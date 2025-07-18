@@ -1,5 +1,0 @@
-- name: Reload nginx service
-  systemd:
-    enabled: true
-    state: reloaded
-    name: nginx.service

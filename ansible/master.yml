@@ -1,4 +1,0 @@
-#!/usr/bin/env ansible-playbook
-#
-- import_playbook: backend.yml
-- import_playbook: frontend.yml
