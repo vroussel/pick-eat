@@ -6,7 +6,6 @@ You're on the v2 branch which is very very WIP. The goal of this branch is to tr
  - try htmx (hence probably get rid of vuejs and make backend spit html)
  - way less rigidity when entering recipes, especially ingredients. This is currently very cumberstone and I don't like it.
  - try axum instead of actix
- - try to use a self hosted PASS instead of custom ansible playbook from scratch
  - dockerize apps
 
 Simple web app for finding and sharing recipes.
