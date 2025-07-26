@@ -8,6 +8,8 @@ You're on the v2 branch which is very very WIP. The goal of this branch is to tr
  - try axum instead of actix
  - dockerize apps
 
+---
+
 Simple web app for finding and sharing recipes.
 
 Available at `pick-eat.fr` (only in french at the moment).
