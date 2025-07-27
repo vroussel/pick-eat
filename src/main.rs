@@ -1,6 +1,8 @@
+use axum::{Router, routing::get};
 use clap::Parser;
 use tracing::info;
 
+mod handlers;
 mod logging;
 
 #[derive(Parser, Debug)]
@@ -10,13 +12,22 @@ struct Args {
     verbose: u8,
 }
 
-fn main() -> Result<(), anyhow::Error> {
+#[tokio::main]
+async fn main() -> Result<(), anyhow::Error> {
     let args = Args::parse();
     logging::setup(args.verbose);
+
     info!(
         "Starting {} v{}",
         env!("CARGO_CRATE_NAME"),
         env!("CARGO_PKG_VERSION")
     );
+
+    let app = Router::new().route("/isalive", get(handlers::isalive));
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:4242")
+        .await
+        .unwrap();
+    axum::serve(listener, app).await?;
+
     Ok(())
 }
