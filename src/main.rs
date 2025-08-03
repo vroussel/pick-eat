@@ -1,8 +1,8 @@
-use axum::{Router, routing::get};
 use clap::Parser;
+use pickeat_server::run;
+use tokio::net::TcpListener;
 use tracing::info;
 
-mod handlers;
 mod logging;
 
 #[derive(Parser, Debug)]
@@ -23,11 +23,9 @@ async fn main() -> Result<(), anyhow::Error> {
         env!("CARGO_PKG_VERSION")
     );
 
-    let app = Router::new().route("/isalive", get(handlers::isalive));
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:4242")
+    let listener = TcpListener::bind("127.0.0.1:4242")
         .await
-        .unwrap();
-    axum::serve(listener, app).await?;
-
+        .expect("Unable to bind on address");
+    run(listener).await??;
     Ok(())
 }
