@@ -891,6 +891,7 @@ dependencies = [
  "axum",
  "clap",
  "reqwest",
+ "serde",
  "thiserror",
  "tokio",
  "tracing",
