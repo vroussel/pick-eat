@@ -1,7 +1,6 @@
-use std::net::SocketAddr;
+use crate::common::spawn_app;
 
-use pickeat_server::run;
-use tokio::net::TcpListener;
+pub(crate) mod common;
 
 #[tokio::test]
 async fn isalive_works() {
@@ -16,15 +15,4 @@ async fn isalive_works() {
 
     assert!(response.status().is_success());
     assert_eq!(response.content_length(), Some(0));
-}
-
-async fn spawn_app() -> SocketAddr {
-    let listener = TcpListener::bind("127.0.0.1:0")
-        .await
-        .expect("Unable to bind on address");
-    let addr = listener
-        .local_addr()
-        .expect("Unable to retrieve server port");
-    tokio::spawn(run(listener));
-    addr
 }
