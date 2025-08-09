@@ -19,6 +19,8 @@ jobs:
         os: [ubuntu-latest, ubuntu-24.04-arm]
 
     steps:
+    - name: Rustup update
+      run: rustup update
     - uses: actions/checkout@v4
     - name: Build
       run: cargo build --verbose
