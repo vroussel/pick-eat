@@ -892,6 +892,7 @@ dependencies = [
  "clap",
  "reqwest",
  "serde",
+ "tempfile",
  "thiserror",
  "tokio",
  "tracing",
