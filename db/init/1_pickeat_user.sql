@@ -1,0 +1,4 @@
+CREATE ROLE pickeat WITH
+    LOGIN
+    CREATEROLE
+    PASSWORD '1111'
