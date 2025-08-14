@@ -15,7 +15,7 @@ impl TestApp {
     fn new() -> Self {
         let bin_path = PathBuf::from(env!("CARGO_BIN_EXE_pickeat-server"));
         let mut cmd = Command::new(bin_path);
-        cmd.stdout(Stdio::null());
+
         let port_file = NamedTempFile::new().expect("Unable to create temp file");
         cmd.env(
             "TEST_LISTENING_PORT_FILE",
@@ -23,6 +23,13 @@ impl TestApp {
         );
 
         Self { cmd, port_file }
+        cmd.stdout(Stdio::null());
+        cmd.args(["--conf", "tests/test_conf.toml"]);
+
+        Self {
+            cmd,
+            port_file,
+        }
     }
     fn get_listening_port(&self) -> Result<u16, &str> {
         let mut port = None;

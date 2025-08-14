@@ -7,6 +7,9 @@ use axum::{
 use clap::Parser;
 use tracing::info;
 
+use crate::conf::AppConf;
+
+mod conf;
 mod handlers;
 mod logging;
 
@@ -15,10 +18,8 @@ mod logging;
 struct Args {
     #[arg(short, action = clap::ArgAction::Count)]
     verbose: u8,
-    #[arg(short)]
-    port: Option<u16>,
-    #[arg(long)]
-    port_file: Option<PathBuf>,
+    #[arg(short, long)]
+    conf: PathBuf,
 }
 
 #[tokio::main]
@@ -32,11 +33,13 @@ async fn main() -> Result<(), anyhow::Error> {
         env!("CARGO_PKG_VERSION")
     );
 
+    let conf = AppConf::from_file(args.conf)?;
+
     let app = Router::new()
         .route("/isalive", get(handlers::isalive))
         .route("/recipes", post(handlers::recipes::post));
 
-    let addr = format!("127.0.0.1:{}", args.port.unwrap_or(0));
+    let addr = format!("{}:{}", conf.http.ip, conf.http.port);
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
 
     // For integration tests, we need to know which port to call

@@ -1,0 +1,53 @@
+use std::{io, net::Ipv4Addr, path::PathBuf};
+
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+pub(crate) struct AppConf {
+    pub(crate) db: DBConf,
+    pub(crate) http: HttpConf,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct DBConf {
+    pub(crate) host: String,
+    pub(crate) port: u16,
+    pub(crate) name: String,
+    pub(crate) app_user: DBUser,
+    pub(crate) migration_user: DBUser,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct DBUser {
+    pub(crate) name: String,
+    pub(crate) password: String,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct HttpConf {
+    pub(crate) ip: Ipv4Addr,
+    pub(crate) port: u16,
+}
+
+#[derive(thiserror::Error, Debug)]
+#[error(transparent)]
+pub(crate) enum AppConfParsingError {
+    IO(#[from] io::Error),
+    Deserialize(#[from] toml::de::Error),
+}
+
+impl AppConf {
+    pub(crate) fn from_file(path: PathBuf) -> Result<Self, AppConfParsingError> {
+        let file_content = std::fs::read_to_string(path)?;
+        let mut ret: AppConf = toml::from_str(&file_content)?;
+
+        // For integration tests, we need to use one db per test
+        if let Ok(db_name) = std::env::var("TEST_DB_NAME") {
+            ret.db.name = db_name;
+        }
+
+        Ok(ret)
+    }
+}
+
+//TODO add unit tests
