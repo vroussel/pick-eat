@@ -9,6 +9,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  DB_SUPERUSER_PASSWORD: postgres
 
 jobs:
   build:

@@ -1,0 +1,14 @@
+services:
+  postgres:
+    build: db
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_superuser_password
+    ports:
+      - "5432:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    secrets:
+      - db_superuser_password
+secrets:
+  db_superuser_password:
+    environment: DB_SUPERUSER_PASSWORD
