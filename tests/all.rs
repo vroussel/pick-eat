@@ -1,3 +1,4 @@
+use askama::Template;
 use std::{
     fs,
     path::PathBuf,
@@ -5,51 +6,88 @@ use std::{
     time::Duration,
 };
 use tempfile::NamedTempFile;
+use uuid::Uuid;
 
-struct TestApp {
-    cmd: Command,
-    port_file: NamedTempFile,
+mod test_app {
+    use super::*;
+    pub struct TestApp {
+        cmd: Command,
+        port_file: NamedTempFile,
+        test_db_name: String,
+        _conf_file: NamedTempFile,
+    }
+
+    impl TestApp {
+        pub fn new() -> Self {
+            dotenv::dotenv().ok();
+
+            let bin_path = PathBuf::from(env!("CARGO_BIN_EXE_pickeat-server"));
+            let mut cmd = Command::new(bin_path);
+
+            let port_file = NamedTempFile::new().expect("Unable to create temp file");
+            cmd.env(
+                "TEST_LISTENING_PORT_FILE",
+                port_file.path().to_str().unwrap(),
+            );
+
+            let test_db_name = Uuid::new_v4().to_string();
+            let app_user_password = std::env::var("PG_PICKEAT_APP_PASSWORD")
+                .expect("Missing PG_PICKEAT_APP_PASSWORD env var");
+            let migration_user_password =
+                std::env::var("PG_PICKEAT_PASSWORD").expect("Missing PG_PICKEAT_PASSWORD env var");
+
+            let app_conf = TestAppConf {
+                test_db_name: test_db_name.clone(),
+                app_user_password,
+                migration_user_password,
+            };
+            let mut conf_file = tempfile::NamedTempFile::new().unwrap();
+            app_conf.write_into(&mut conf_file).unwrap();
+
+            cmd.args(["--conf", conf_file.path().to_str().unwrap()]);
+            cmd.stdout(Stdio::null());
+
+            Self {
+                cmd,
+                port_file,
+                test_db_name,
+                _conf_file: conf_file,
+            }
+        }
+        pub fn get_listening_port(&self) -> Result<u16, &str> {
+            let mut port = None;
+            for _ in 0..50 {
+                if let Ok(content) = fs::read_to_string(&self.port_file)
+                    && let Ok(p) = content.trim().parse::<u16>()
+                {
+                    port = Some(p);
+                    break;
+                }
+                std::thread::sleep(Duration::from_millis(100));
+            }
+            port.ok_or("Unable to retrieve app listening port")
+        }
+
+        pub fn cmd(&mut self) -> &mut Command {
+            &mut self.cmd
+        }
+    }
 }
 
-impl TestApp {
-    fn new() -> Self {
-        let bin_path = PathBuf::from(env!("CARGO_BIN_EXE_pickeat-server"));
-        let mut cmd = Command::new(bin_path);
+use test_app::TestApp;
 
-        let port_file = NamedTempFile::new().expect("Unable to create temp file");
-        cmd.env(
-            "TEST_LISTENING_PORT_FILE",
-            port_file.path().to_str().unwrap(),
-        );
-
-        Self { cmd, port_file }
-        cmd.stdout(Stdio::null());
-        cmd.args(["--conf", "tests/test_conf.toml"]);
-
-        Self {
-            cmd,
-            port_file,
-        }
-    }
-    fn get_listening_port(&self) -> Result<u16, &str> {
-        let mut port = None;
-        for _ in 0..50 {
-            if let Ok(content) = fs::read_to_string(&self.port_file)
-                && let Ok(p) = content.trim().parse::<u16>()
-            {
-                port = Some(p);
-                break;
-            }
-            std::thread::sleep(Duration::from_millis(100));
-        }
-        port.ok_or("Unable to retrieve app listening port")
-    }
+#[derive(Template)]
+#[template(path = "../tests/test_conf.toml.j2")]
+struct TestAppConf {
+    test_db_name: String,
+    app_user_password: String,
+    migration_user_password: String,
 }
 
 #[test]
 fn port_file_written() {
     let mut app = TestApp::new();
-    let _ = app.cmd.spawn();
+    let _ = app.cmd().spawn();
     let port = app.get_listening_port();
     assert!(port.is_ok())
 }
@@ -57,7 +95,7 @@ fn port_file_written() {
 #[tokio::test]
 async fn isalive_works() {
     let mut app = TestApp::new();
-    let _ = app.cmd.spawn();
+    let _ = app.cmd().spawn();
     let port = app.get_listening_port().unwrap();
 
     let client = reqwest::Client::new();
@@ -75,7 +113,7 @@ async fn isalive_works() {
 #[tokio::test]
 async fn add_recipe_returns_200_with_valid_data() {
     let mut app = TestApp::new();
-    let _ = app.cmd.spawn();
+    let _ = app.cmd().spawn();
     let port = app.get_listening_port().unwrap();
 
     let client = reqwest::Client::new();
@@ -95,7 +133,7 @@ async fn add_recipe_returns_200_with_valid_data() {
 #[tokio::test]
 async fn add_recipe_returns_422_when_data_is_missing() {
     let mut app = TestApp::new();
-    let _ = app.cmd.spawn();
+    let _ = app.cmd().spawn();
     let port = app.get_listening_port().unwrap();
 
     let client = reqwest::Client::new();

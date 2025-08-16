@@ -5,12 +5,12 @@ port = 0
 [db]
 host = "localhost"
 port = 5432
-name = "pickeat"
+name = "{{ test_db_name }}"
 
 [db.app_user]
 name = "pickeat_app"
-password = "app"
+password = "{{ app_user_password }}"
 
 [db.migration_user]
-name = "pickeat_migrations"
-password = "migr"
+name = "pickeat"
+password = "{{ migration_user_password }}"
