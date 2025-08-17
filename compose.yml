@@ -9,6 +9,12 @@ services:
       - /var/lib/postgresql/data
     secrets:
       - db_superuser_password
+      - db_pickeat_password
+      - db_pickeat_app_password
 secrets:
   db_superuser_password:
     environment: DB_SUPERUSER_PASSWORD
+  db_pickeat_password:
+    environment: DB_PICKEAT_PASSWORD
+  db_pickeat_app_password:
+    environment: DB_PICKEAT_APP_PASSWORD
