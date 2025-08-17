@@ -13,7 +13,6 @@ mod test_app {
     pub struct TestApp {
         cmd: Command,
         port_file: NamedTempFile,
-        test_db_name: String,
         _conf_file: NamedTempFile,
     }
 
@@ -37,7 +36,7 @@ mod test_app {
                 std::env::var("DB_PICKEAT_PASSWORD").expect("Missing DB_PICKEAT_PASSWORD env var");
 
             let app_conf = TestAppConf {
-                test_db_name: test_db_name.clone(),
+                test_db_name,
                 app_user_password,
                 migration_user_password,
             };
@@ -50,7 +49,6 @@ mod test_app {
             Self {
                 cmd,
                 port_file,
-                test_db_name,
                 _conf_file: conf_file,
             }
         }
