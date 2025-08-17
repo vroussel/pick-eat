@@ -26,6 +26,7 @@ jobs:
         echo "DATABASE_URL=postgres://pickeat:${DB_PICKEAT_PASSWORD}@localhost:5432/pickeat" >> $GITHUB_ENV
     - name: Rustup update
       run: rustup update
+    - uses: Swatinem/rust-cache@v2
     - uses: actions/checkout@v4
     - name: Launch db container
       run: docker compose up --build -d
@@ -49,6 +50,7 @@ jobs:
     steps:
     - name: Rustup update
       run: rustup update
+    - uses: Swatinem/rust-cache@v2
     - uses: actions/checkout@v4
     - name: Run clippy
       run: cargo clippy --all-targets --all-features -- -D warnings
