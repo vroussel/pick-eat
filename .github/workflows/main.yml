@@ -10,10 +10,37 @@ on:
 env:
   CARGO_TERM_COLOR: always
   DB_SUPERUSER_PASSWORD: postgres
+  DB_PICKEAT_PASSWORD: pickeat
+  DB_PICKEAT_APP_PASSWORD: app
 
 jobs:
-  build:
+  check-sqlx:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
 
+    steps:
+    - name: Set DATABASE_URL
+      run: |
+        echo "DATABASE_URL=postgres://pickeat:${DB_PICKEAT_PASSWORD}@localhost:5432/pickeat" >> $GITHUB_ENV
+    - name: Rustup update
+      run: rustup update
+    - uses: actions/checkout@v4
+    - name: Launch db container
+      run: docker compose up --build -d
+    - name: Install sqlx-cli
+      run: cargo install sqlx-cli --no-default-features --features postgres
+    - name: Run SQL migrations
+      run: sqlx migrate run --source db/migrations/
+    - name: Check sqlx prepare
+      run: cargo sqlx prepare --check
+
+
+  build:
+    needs: check-sqlx
+    env:
+      SQLX_OFFLINE: true
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
