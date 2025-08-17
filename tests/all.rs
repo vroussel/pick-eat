@@ -31,10 +31,10 @@ mod test_app {
             );
 
             let test_db_name = Uuid::new_v4().to_string();
-            let app_user_password = std::env::var("PG_PICKEAT_APP_PASSWORD")
-                .expect("Missing PG_PICKEAT_APP_PASSWORD env var");
+            let app_user_password = std::env::var("DB_PICKEAT_APP_PASSWORD")
+                .expect("Missing DB_PICKEAT_APP_PASSWORD env var");
             let migration_user_password =
-                std::env::var("PG_PICKEAT_PASSWORD").expect("Missing PG_PICKEAT_PASSWORD env var");
+                std::env::var("DB_PICKEAT_PASSWORD").expect("Missing DB_PICKEAT_PASSWORD env var");
 
             let app_conf = TestAppConf {
                 test_db_name: test_db_name.clone(),
