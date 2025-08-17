@@ -39,14 +39,7 @@ pub(crate) enum AppConfParsingError {
 impl AppConf {
     pub(crate) fn from_file(path: PathBuf) -> Result<Self, AppConfParsingError> {
         let file_content = std::fs::read_to_string(path)?;
-        let mut ret: AppConf = toml::from_str(&file_content)?;
-
-        // For integration tests, we need to use one db per test
-        if let Ok(db_name) = std::env::var("TEST_DB_NAME") {
-            ret.db.name = db_name;
-        }
-
-        Ok(ret)
+        Ok(toml::from_str(&file_content)?)
     }
 }
 
