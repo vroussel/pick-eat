@@ -10,6 +10,7 @@ use tracing::info;
 use crate::conf::AppConf;
 
 mod conf;
+mod db;
 mod handlers;
 mod logging;
 
@@ -34,6 +35,8 @@ async fn main() -> Result<(), anyhow::Error> {
     );
 
     let conf = AppConf::from_file(args.conf)?;
+
+    db::get_pool(&conf.db).await?;
 
     let app = Router::new()
         .route("/isalive", get(handlers::isalive))
