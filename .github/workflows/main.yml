@@ -37,8 +37,6 @@ jobs:
 
   build:
     needs: check-sqlx
-    env:
-      SQLX_OFFLINE: true
     runs-on: ubuntu-latest
 
     steps:
