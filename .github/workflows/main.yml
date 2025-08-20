@@ -44,6 +44,8 @@ jobs:
       run: cargo clippy --all-targets --all-features -- -D warnings
     - name: Run rustfmt
       run: cargo fmt -- --check
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
     - name: Build docker image (builder stage, for testing purpose)
       run: docker build --platform linux/amd64,linux/arm64 --target builder -t builder .
     - name: Launch db container
