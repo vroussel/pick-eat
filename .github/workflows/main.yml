@@ -57,12 +57,12 @@ jobs:
     - name: Run rustfmt
       run: cargo fmt -- --check
     - name: Build docker image (builder stage, for testing purpose)
-      run: docker build --target builder -t builder .
+      run: docker build --platform linux/amd64,linux/arm64 --target builder -t builder .
     - name: Launch db container
       run: docker compose up --build -d
     - name: Run tests
       run: docker run -e DB_PICKEAT_APP_PASSWORD -e DB_PICKEAT_PASSWORD --network=host builder cargo test --release
     - name: Build docker image (runtime stage)
-      run: docker build -t pickeat-server:${{ github.sha }} .
+      run: docker build --platform linux/amd64,linux/arm64 -t pickeat-server:${{ github.sha }} .
     - name: Tag image for staging
       run: docker tag pickeat-server:${{ github.sha }} pickeat-server:staging
