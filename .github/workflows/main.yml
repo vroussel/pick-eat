@@ -15,10 +15,7 @@ env:
 
 jobs:
   check-sqlx:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ubuntu-latest
 
     steps:
     - name: Set DATABASE_URL
@@ -42,10 +39,7 @@ jobs:
     needs: check-sqlx
     env:
       SQLX_OFFLINE: true
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ubuntu-latest
 
     steps:
     - name: Rustup update
