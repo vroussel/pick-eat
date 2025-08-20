@@ -47,12 +47,22 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     - name: Build docker image (builder stage, for testing purpose)
-      run: docker build --platform linux/amd64,linux/arm64 --target builder -t builder .
+      uses: docker/build-push-action@v6
+      with:
+        target: builder
+        load: true
+        tags: builder
+        cache-from: type=registry,ref=vroussel/pick-eat:buildcache
+        platforms: linux/amd64
     - name: Launch db container
       run: docker compose up --build -d
     - name: Run tests
-      run: docker run -e DB_PICKEAT_APP_PASSWORD -e DB_PICKEAT_PASSWORD --network=host builder cargo test --release
+      run: docker run --rm -e DB_PICKEAT_APP_PASSWORD -e DB_PICKEAT_PASSWORD --network=host builder cargo test --release
     - name: Build docker image (runtime stage)
-      run: docker build --platform linux/amd64,linux/arm64 -t pickeat-server:${{ github.sha }} .
-    - name: Tag image for staging
-      run: docker tag pickeat-server:${{ github.sha }} pickeat-server:staging
+      uses: docker/build-push-action@v6
+      with:
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: vroussel/pick-eat:staging
+        cache-from: type=registry,ref=vroussel/pick-eat:buildcache
+        cache-to: type=registry,ref=vroussel/pick-eat:buildcache,mode=max
