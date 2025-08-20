@@ -2,6 +2,7 @@ FROM --platform=$BUILDPLATFORM rust:1.89 AS builder
 ENV SQLX_OFFLINE=true
 WORKDIR /app
 COPY . .
+RUN echo "TARGETPLATFORM is: $TARGETPLATFORM"
 RUN case "$TARGETPLATFORM" in \
     "linux/arm64") \
         rustup target add aarch64-unknown-linux-gnu; \
