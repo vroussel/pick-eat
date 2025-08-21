@@ -55,6 +55,7 @@ jobs:
     - name: Build docker image (builder stage, for testing purpose)
       uses: docker/build-push-action@v6
       with:
+        context: .
         target: builder
         load: true
         tags: builder
@@ -69,6 +70,7 @@ jobs:
     - name: Build docker image (runtime stage)
       uses: docker/build-push-action@v6
       with:
+        context: .
         platforms: linux/amd64,linux/arm64
         push: true
         tags: ghcr.io/vroussel/pick-eat:staging
