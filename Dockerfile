@@ -1,10 +1,6 @@
 FROM --platform=$BUILDPLATFORM rust:1.89 AS builder
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
-ENV SQLX_OFFLINE=true
-WORKDIR /app
-COPY . .
-RUN echo "TARGETPLATFORM is: $TARGETPLATFORM"
 RUN case "$TARGETPLATFORM" in \
     "linux/arm64") \
         rustup target add aarch64-unknown-linux-gnu; \
@@ -17,9 +13,18 @@ RUN case "$TARGETPLATFORM" in \
         ;; \
     *) exit 1;; \
 esac
-RUN --mount=type=cache,target=./target \
-     --mount=type=cache,target=~/.cargo \
-     cargo build --locked --release
+ENV SQLX_OFFLINE=true
+WORKDIR /app
+COPY \
+    Cargo.toml Cargo.lock \
+    .
+RUN mkdir -p src && \
+    echo "fn main() {}" > src/main.rs && \
+    cargo fetch --locked
+COPY \
+    src db templates tests \
+    .
+RUN cargo build --locked --release
 RUN cargo install --locked --path . --root /out
 
 FROM debian:trixie-slim AS runtime
