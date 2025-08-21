@@ -59,8 +59,9 @@ jobs:
         target: builder
         load: true
         tags: builder
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: |
+            type=registry,ref=ghcr.io/vroussel/pick-eat-cache:${{ github.ref_name }}
+            type=registry,ref=ghcr.io/vroussel/pick-eat-cache:v2
         platforms: linux/amd64
     - name: Launch db container
       run: docker compose up --build -d
@@ -73,5 +74,8 @@ jobs:
         platforms: linux/amd64,linux/arm64
         push: true
         tags: ghcr.io/vroussel/pick-eat:staging
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: |
+            type=registry,ref=ghcr.io/vroussel/pick-eat-cache:${{ github.ref_name }}
+            type=registry,ref=ghcr.io/vroussel/pick-eat-cache:v2
+        cache-to: |
+            type=registry,ref=ghcr.io/vroussel/pick-eat-cache:${{ github.ref_name }},mode=max
