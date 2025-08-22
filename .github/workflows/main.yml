@@ -34,7 +34,6 @@ jobs:
 
 
   build:
-    needs: check-sqlx
     runs-on: ubuntu-latest
 
     steps:
