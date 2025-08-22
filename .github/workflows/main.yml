@@ -66,13 +66,19 @@ jobs:
       run: docker compose up --build -d
     - name: Run tests
       run: docker run --rm -e DB_PICKEAT_APP_PASSWORD -e DB_PICKEAT_PASSWORD --network=host builder cargo test --release
+
+    # Build and push docker images, with staging tag
+    - name: Fetch short commit sha
+      run: echo "SHA_SHORT=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
     - name: Build docker image (runtime stage)
       uses: docker/build-push-action@v6
       with:
         context: .
         platforms: linux/amd64,linux/arm64
         push: true
-        tags: ghcr.io/vroussel/pick-eat:staging
+        tags: |
+          ghcr.io/vroussel/pick-eat:staging
+          ghcr.io/vroussel/pick-eat:${{ env.SHA_SHORT }}
         cache-from: |
             type=registry,ref=ghcr.io/vroussel/pick-eat-cache:${{ github.ref_name }}
             type=registry,ref=ghcr.io/vroussel/pick-eat-cache:v2
@@ -85,7 +91,9 @@ jobs:
         platforms: linux/amd64,linux/arm64
         file: db/Dockerfile
         push: true
-        tags: ghcr.io/vroussel/pick-eat-postgres:staging
+        tags: |
+          ghcr.io/vroussel/pick-eat-postgres:staging
+          ghcr.io/vroussel/pick-eat-postgres:${{ env.SHA_SHORT }}
         cache-from: |
             type=registry,ref=ghcr.io/vroussel/pick-eat-postgres-cache:${{ github.ref_name }}
             type=registry,ref=ghcr.io/vroussel/pick-eat-postgres-cache:v2
