@@ -78,3 +78,16 @@ jobs:
             type=registry,ref=ghcr.io/vroussel/pick-eat-cache:v2
         cache-to: |
             type=registry,ref=ghcr.io/vroussel/pick-eat-cache:${{ github.ref_name }},mode=max
+    - name: Build DB docker image (builder stage, for testing purpose)
+      uses: docker/build-push-action@v6
+      with:
+        context: ./db
+        platforms: linux/amd64,linux/arm64
+        file: db/Dockerfile
+        push: true
+        tags: ghcr.io/vroussel/pick-eat-postgres:staging
+        cache-from: |
+            type=registry,ref=ghcr.io/vroussel/pick-eat-postgres-cache:${{ github.ref_name }}
+            type=registry,ref=ghcr.io/vroussel/pick-eat-postgres-cache:v2
+        cache-to: |
+            type=registry,ref=ghcr.io/vroussel/pick-eat-postgres-cache:${{ github.ref_name }},mode=max
