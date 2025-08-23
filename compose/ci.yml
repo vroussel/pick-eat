@@ -1,6 +1,6 @@
 services:
   postgres:
-    build: db
+    build: ../db
     environment:
       POSTGRES_PASSWORD_FILE: /run/secrets/db_superuser_password
     ports:
