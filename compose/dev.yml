@@ -1,0 +1,9 @@
+services:
+  postgres:
+    build: ../db
+    environment:
+      POSTGRES_PASSWORD: "${DB_SUPERUSER_PASSWORD}"
+      DB_PICKEAT_PASSWORD: "${DB_PICKEAT_PASSWORD}"
+      DB_PICKEAT_APP_PASSWORD: "${DB_PICKEAT_APP_PASSWORD}"
+    ports:
+      - "5432:5432"
