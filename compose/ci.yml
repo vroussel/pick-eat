@@ -3,6 +3,8 @@ services:
     build: ../db
     environment:
       POSTGRES_PASSWORD_FILE: /run/secrets/db_superuser_password
+      DB_PICKEAT_PASSWORD_FILE: /run/secrets/db_pickeat_password
+      DB_PICKEAT_APP_PASSWORD_FILE: /run/secrets/db_pickeat_app_password
     ports:
       - "5432:5432"
     tmpfs:
