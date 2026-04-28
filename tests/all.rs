@@ -1,4 +1,5 @@
 use askama::Template;
+use sqlx::{Connection, PgConnection};
 use std::{
     fs,
     path::PathBuf,
@@ -14,6 +15,7 @@ mod test_app {
         cmd: Command,
         port_file: NamedTempFile,
         _conf_file: NamedTempFile,
+        db_conn_string: String,
     }
 
     impl TestApp {
@@ -35,6 +37,11 @@ mod test_app {
             let migration_user_password =
                 std::env::var("DB_PICKEAT_PASSWORD").expect("Missing DB_PICKEAT_PASSWORD env var");
 
+            let db_conn_string = format!(
+                "postgres://pickeat_app:{}@127.0.0.1:5432/{}",
+                app_user_password, test_db_name
+            );
+
             let app_conf = TestAppConf {
                 test_db_name,
                 app_user_password,
@@ -50,6 +57,7 @@ mod test_app {
                 cmd,
                 port_file,
                 _conf_file: conf_file,
+                db_conn_string,
             }
         }
         pub fn get_listening_port(&self) -> Result<u16, &str> {
@@ -68,6 +76,10 @@ mod test_app {
 
         pub fn cmd(&mut self) -> &mut Command {
             &mut self.cmd
+        }
+
+        pub fn db_conn_string(&self) -> &str {
+            &self.db_conn_string
         }
     }
 }
@@ -115,6 +127,7 @@ async fn add_recipe_returns_200_with_valid_data() {
     let port = app.get_listening_port().unwrap();
 
     let client = reqwest::Client::new();
+    let mut db_conn = PgConnection::connect(app.db_conn_string()).await.unwrap();
 
     let body = "name=pizza%204%20fromages";
     let response = client
@@ -125,7 +138,14 @@ async fn add_recipe_returns_200_with_valid_data() {
         .await
         .expect("Failed to execute request");
 
+    let recipes = sqlx::query!("SELECT name from recipes")
+        .fetch_all(&mut db_conn)
+        .await
+        .unwrap();
+
     assert_eq!(response.status().as_u16(), 200);
+    assert_eq!(recipes.len(), 1);
+    assert_eq!(recipes[0].name, "pizza 4 fromages");
 }
 
 #[tokio::test]
@@ -135,6 +155,7 @@ async fn add_recipe_returns_422_when_data_is_missing() {
     let port = app.get_listening_port().unwrap();
 
     let client = reqwest::Client::new();
+    let mut db_conn = PgConnection::connect(app.db_conn_string()).await.unwrap();
 
     let test_cases = [("", "missing the name")];
     for (invalid_body, error_message) in test_cases {
@@ -146,10 +167,16 @@ async fn add_recipe_returns_422_when_data_is_missing() {
             .await
             .expect("Failed to execute request");
 
+        let saved = sqlx::query!("SELECT count(*) from recipes")
+            .fetch_one(&mut db_conn)
+            .await
+            .unwrap();
+
         assert_eq!(
             response.status().as_u16(),
             422,
             "The API did not fail with HTTP 422 when the payload was {error_message}",
         );
+        assert_eq!(saved.count, Some(0));
     }
 }
