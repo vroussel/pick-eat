@@ -1,10 +1,12 @@
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, sync::Arc};
 
 use axum::{
     Router,
+    extract::FromRef,
     routing::{get, post},
 };
 use clap::Parser;
+use sqlx::PgPool;
 use tracing::info;
 
 use crate::conf::AppConf;
@@ -21,6 +23,11 @@ struct Args {
     verbose: u8,
     #[arg(short, long)]
     conf: PathBuf,
+}
+
+#[derive(FromRef, Clone)]
+struct AppState {
+    db_pool: PgPool,
 }
 
 #[tokio::main]
