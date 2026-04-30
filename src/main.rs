@@ -13,9 +13,9 @@ use tracing::info;
 
 use crate::conf::AppConf;
 
+mod api;
 mod conf;
 mod db;
-mod handlers;
 mod logging;
 
 #[derive(Parser, Debug)]
@@ -69,8 +69,8 @@ async fn main() -> Result<(), anyhow::Error> {
     let shared_state = AppState { db_pool };
 
     let app = Router::new()
-        .route("/isalive", get(handlers::isalive))
-        .route("/recipes", post(handlers::recipes::post))
+        .route("/isalive", get(api::isalive))
+        .route("/recipes", post(api::recipes::post))
         .with_state(shared_state);
 
     let addr = format!("{}:{}", conf.http.ip, conf.http.port);
