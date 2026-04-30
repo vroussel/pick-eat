@@ -3,9 +3,11 @@ use std::{fs, path::PathBuf, sync::Arc};
 use axum::{
     Router,
     extract::FromRef,
+    response::IntoResponse,
     routing::{get, post},
 };
 use clap::Parser;
+use reqwest::StatusCode;
 use sqlx::PgPool;
 use tracing::info;
 
@@ -30,6 +32,26 @@ struct AppState {
     db_pool: PgPool,
 }
 
+#[derive(Debug)]
+enum AppError {
+    DBError(sqlx::Error),
+}
+
+impl From<sqlx::Error> for AppError {
+    fn from(value: sqlx::Error) -> Self {
+        Self::DBError(value)
+    }
+}
+
+impl IntoResponse for AppError {
+    fn into_response(self) -> axum::response::Response {
+        let (code, body) = match self {
+            AppError::DBError(_) => (StatusCode::INTERNAL_SERVER_ERROR, ""),
+        };
+        (code, body).into_response()
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
     let args = Args::parse();
@@ -43,11 +65,13 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let conf = AppConf::from_file(args.conf)?;
 
-    db::get_pool(&conf.db).await?;
+    let db_pool = db::get_pool(&conf.db).await?;
+    let shared_state = AppState { db_pool };
 
     let app = Router::new()
         .route("/isalive", get(handlers::isalive))
-        .route("/recipes", post(handlers::recipes::post));
+        .route("/recipes", post(handlers::recipes::post))
+        .with_state(shared_state);
 
     let addr = format!("{}:{}", conf.http.ip, conf.http.port);
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
