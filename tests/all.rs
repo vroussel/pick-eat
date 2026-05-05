@@ -78,8 +78,8 @@ mod test_app {
             &mut self.cmd
         }
 
-        pub fn db_conn_string(&self) -> &str {
-            &self.db_conn_string
+        pub async fn open_db_conn(&self) -> PgConnection {
+            PgConnection::connect(&self.db_conn_string).await.unwrap()
         }
     }
 }
@@ -127,7 +127,7 @@ async fn add_recipe_returns_200_with_valid_data() {
     let port = app.get_listening_port().unwrap();
 
     let client = reqwest::Client::new();
-    let mut db_conn = PgConnection::connect(app.db_conn_string()).await.unwrap();
+    let mut db_conn = app.open_db_conn().await;
 
     let body = "name=pizza%204%20fromages";
     let response = client
@@ -155,7 +155,7 @@ async fn add_recipe_returns_422_when_data_is_missing() {
     let port = app.get_listening_port().unwrap();
 
     let client = reqwest::Client::new();
-    let mut db_conn = PgConnection::connect(app.db_conn_string()).await.unwrap();
+    let mut db_conn = app.open_db_conn().await;
 
     let test_cases = [("", "missing the name")];
     for (invalid_body, error_message) in test_cases {
