@@ -31,7 +31,7 @@ mod test_app {
                 port_file.path().to_str().unwrap(),
             );
 
-            let test_db_name = Uuid::new_v4().to_string();
+            let test_db_name = Uuid::now_v7().to_string();
             let app_user_password = std::env::var("DB_PICKEAT_APP_PASSWORD")
                 .expect("Missing DB_PICKEAT_APP_PASSWORD env var");
             let migration_user_password =
