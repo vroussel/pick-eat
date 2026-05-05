@@ -12,6 +12,13 @@ services:
       interval: 2s
       timeout: 5s
       retries: 10
+    # Uncomment this to tests migrations easily
+    # tmpfs:
+    #   - /var/lib/postgresql
+    # develop:
+    #   watch:
+    #     - action: rebuild
+    #       path: ./db/
   migrate:
     build:
       context: .
