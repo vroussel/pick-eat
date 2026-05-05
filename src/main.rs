@@ -1,8 +1,7 @@
-use std::{fs, path::PathBuf, sync::Arc};
+use std::{fs, path::PathBuf};
 
 use axum::{
     Router,
-    extract::FromRef,
     response::IntoResponse,
     routing::{get, post},
 };
@@ -14,6 +13,7 @@ use tracing::info;
 use crate::conf::AppConf;
 
 mod api;
+mod app;
 mod conf;
 mod db;
 mod logging;
@@ -27,7 +27,7 @@ struct Args {
     conf: PathBuf,
 }
 
-#[derive(FromRef, Clone)]
+#[derive(Clone)]
 struct AppState {
     db_pool: PgPool,
 }
@@ -65,12 +65,12 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let conf = AppConf::from_file(args.conf)?;
 
-    let db_pool = db::get_pool(&conf.db).await?;
+    let db_pool = db::init(&conf.db).await?;
     let shared_state = AppState { db_pool };
 
     let app = Router::new()
-        .route("/isalive", get(api::isalive))
-        .route("/recipes", post(api::recipes::post))
+        .route("/isalive", get(api::routes::is_alive))
+        .route("/recipes", post(api::routes::recipes::post))
         .with_state(shared_state);
 
     let addr = format!("{}:{}", conf.http.ip, conf.http.port);
