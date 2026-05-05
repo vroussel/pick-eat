@@ -2,12 +2,11 @@ use std::{fs, path::PathBuf};
 
 use axum::{
     Router,
-    response::IntoResponse,
     routing::{get, post},
 };
 use clap::Parser;
-use reqwest::StatusCode;
 use sqlx::PgPool;
+use thiserror::Error;
 use tracing::info;
 
 use crate::conf::AppConf;
@@ -32,24 +31,10 @@ struct AppState {
     db_pool: PgPool,
 }
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 enum AppError {
-    DBError(sqlx::Error),
-}
-
-impl From<sqlx::Error> for AppError {
-    fn from(value: sqlx::Error) -> Self {
-        Self::DBError(value)
-    }
-}
-
-impl IntoResponse for AppError {
-    fn into_response(self) -> axum::response::Response {
-        let (code, body) = match self {
-            AppError::DBError(_) => (StatusCode::INTERNAL_SERVER_ERROR, ""),
-        };
-        (code, body).into_response()
-    }
+    #[error("Database error")]
+    DBError(#[from] sqlx::Error),
 }
 
 #[tokio::main]
