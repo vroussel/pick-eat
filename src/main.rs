@@ -56,6 +56,7 @@ async fn main() -> Result<(), anyhow::Error> {
     let app = Router::new()
         .route("/isalive", get(api::routes::is_alive))
         .route("/recipes", post(api::routes::recipes::post))
+        .route("/recipes/{recipe_id}", get(api::routes::recipes::get))
         .with_state(shared_state);
 
     let addr = format!("{}:{}", conf.http.ip, conf.http.port);
