@@ -1,0 +1,16 @@
+[http]
+ip = "127.0.0.1"
+port = 4242
+
+[db]
+host = "localhost"
+port = 5432
+name = "pickeat"
+
+[db.app_user]
+name = "pickeat_app"
+password = "app"
+
+[db.migration_user]
+name = "pickeat"
+password = "pickeat"
