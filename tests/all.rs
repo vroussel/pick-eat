@@ -87,7 +87,27 @@ mod test_app {
 use test_app::TestApp;
 
 #[derive(Template)]
-#[template(path = "../tests/test_conf.toml.j2")]
+#[template(
+    ext = "txt",
+    source = r#"
+[http]
+ip = "127.0.0.1"
+port = 0
+
+[db]
+host = "localhost"
+port = 5432
+name = "{{ test_db_name }}"
+
+[db.app_user]
+name = "pickeat_app"
+password = "{{ app_user_password }}"
+
+[db.migration_user]
+name = "pickeat"
+password = "{{ migration_user_password }}"
+    "#
+)]
 struct TestAppConf {
     test_db_name: String,
     app_user_password: String,
