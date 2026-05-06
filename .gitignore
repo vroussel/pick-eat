@@ -2,3 +2,4 @@ tags
 todo
 target
 .env
+config/dev.toml
