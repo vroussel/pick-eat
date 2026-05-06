@@ -1,137 +1,13 @@
-use askama::Template;
-use sqlx::{Connection, PgConnection};
-use std::{
-    fs,
-    path::PathBuf,
-    process::{Command, Stdio},
-    time::Duration,
-};
-use tempfile::NamedTempFile;
-use uuid::Uuid;
-
-mod test_app {
-    use super::*;
-    pub struct TestApp {
-        cmd: Command,
-        port_file: NamedTempFile,
-        _conf_file: NamedTempFile,
-        db_conn_string: String,
-    }
-
-    impl TestApp {
-        pub fn new() -> Self {
-            dotenv::dotenv().ok();
-
-            let bin_path = PathBuf::from(env!("CARGO_BIN_EXE_pickeat-server"));
-            let mut cmd = Command::new(bin_path);
-
-            let port_file = NamedTempFile::new().expect("Unable to create temp file");
-            cmd.env(
-                "TEST_LISTENING_PORT_FILE",
-                port_file.path().to_str().unwrap(),
-            );
-
-            let test_db_name = Uuid::now_v7().to_string();
-            let app_user_password = std::env::var("DB_PICKEAT_APP_PASSWORD")
-                .expect("Missing DB_PICKEAT_APP_PASSWORD env var");
-            let migration_user_password =
-                std::env::var("DB_PICKEAT_PASSWORD").expect("Missing DB_PICKEAT_PASSWORD env var");
-
-            let db_conn_string = format!(
-                "postgres://pickeat_app:{}@127.0.0.1:5432/{}",
-                app_user_password, test_db_name
-            );
-
-            let app_conf = TestAppConf {
-                test_db_name,
-                app_user_password,
-                migration_user_password,
-            };
-            let mut conf_file = tempfile::NamedTempFile::new().unwrap();
-            app_conf.write_into(&mut conf_file).unwrap();
-
-            cmd.args(["--conf", conf_file.path().to_str().unwrap()]);
-            cmd.stdout(Stdio::null());
-
-            Self {
-                cmd,
-                port_file,
-                _conf_file: conf_file,
-                db_conn_string,
-            }
-        }
-        pub fn get_listening_port(&self) -> Result<u16, &str> {
-            let mut port = None;
-            for _ in 0..50 {
-                if let Ok(content) = fs::read_to_string(&self.port_file)
-                    && let Ok(p) = content.trim().parse::<u16>()
-                {
-                    port = Some(p);
-                    break;
-                }
-                std::thread::sleep(Duration::from_millis(100));
-            }
-            port.ok_or("Unable to retrieve app listening port")
-        }
-
-        pub fn cmd(&mut self) -> &mut Command {
-            &mut self.cmd
-        }
-
-        pub async fn open_db_conn(&self) -> PgConnection {
-            PgConnection::connect(&self.db_conn_string).await.unwrap()
-        }
-    }
-}
-
-use test_app::TestApp;
-
-#[derive(Template)]
-#[template(
-    ext = "txt",
-    source = r#"
-[http]
-ip = "127.0.0.1"
-port = 0
-
-[db]
-host = "localhost"
-port = 5432
-name = "{{ test_db_name }}"
-
-[db.app_user]
-name = "pickeat_app"
-password = "{{ app_user_password }}"
-
-[db.migration_user]
-name = "pickeat"
-password = "{{ migration_user_password }}"
-    "#
-)]
-struct TestAppConf {
-    test_db_name: String,
-    app_user_password: String,
-    migration_user_password: String,
-}
-
-#[test]
-fn port_file_written() {
-    let mut app = TestApp::new();
-    let _ = app.cmd().spawn();
-    let port = app.get_listening_port();
-    assert!(port.is_ok())
-}
+mod common;
+use common::TestApp;
 
 #[tokio::test]
 async fn isalive_works() {
-    let mut app = TestApp::new();
-    let _ = app.cmd().spawn();
-    let port = app.get_listening_port().unwrap();
-
+    let app = TestApp::new();
     let client = reqwest::Client::new();
 
     let response = client
-        .get(format!("http://127.0.0.1:{port}/isalive"))
+        .get(format!("{}/isalive", app.api_base_url()))
         .send()
         .await
         .expect("Failed to execute request");
@@ -142,16 +18,13 @@ async fn isalive_works() {
 
 #[tokio::test]
 async fn add_recipe_returns_200_with_valid_data() {
-    let mut app = TestApp::new();
-    let _ = app.cmd().spawn();
-    let port = app.get_listening_port().unwrap();
-
+    let app = TestApp::new();
     let client = reqwest::Client::new();
     let mut db_conn = app.open_db_conn().await;
 
     let body = "name=pizza%204%20fromages";
     let response = client
-        .post(format!("http://127.0.0.1:{port}/recipes"))
+        .post(format!("{}/recipes", app.api_base_url()))
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body(body)
         .send()
@@ -170,17 +43,14 @@ async fn add_recipe_returns_200_with_valid_data() {
 
 #[tokio::test]
 async fn add_recipe_returns_422_when_data_is_missing() {
-    let mut app = TestApp::new();
-    let _ = app.cmd().spawn();
-    let port = app.get_listening_port().unwrap();
-
+    let app = TestApp::new();
     let client = reqwest::Client::new();
     let mut db_conn = app.open_db_conn().await;
 
     let test_cases = [("", "missing the name")];
     for (invalid_body, error_message) in test_cases {
         let response = client
-            .post(format!("http://127.0.0.1:{port}/recipes"))
+            .post(format!("{}/recipes", app.api_base_url()))
             .header("Content-Type", "application/x-www-form-urlencoded")
             .body(invalid_body)
             .send()

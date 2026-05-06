@@ -1,0 +1,121 @@
+use askama::Template;
+use sqlx::{Connection, PgConnection};
+use std::{
+    fs,
+    path::PathBuf,
+    process::{Child, Command, Stdio},
+    time::Duration,
+};
+use tempfile::NamedTempFile;
+use uuid::Uuid;
+
+pub struct TestApp {
+    process: Child,
+    db_conn_string: String,
+    api_base_url: String,
+}
+
+impl Drop for TestApp {
+    fn drop(&mut self) {
+        self.process.kill().expect("Error while killing TestApp");
+    }
+}
+
+impl TestApp {
+    pub fn new() -> Self {
+        dotenv::dotenv().ok();
+
+        let bin_path = PathBuf::from(env!("CARGO_BIN_EXE_pickeat-server"));
+        let mut cmd = Command::new(bin_path);
+
+        let port_file = NamedTempFile::new().expect("Unable to create temp file");
+        cmd.env(
+            "TEST_LISTENING_PORT_FILE",
+            port_file.path().to_str().unwrap(),
+        );
+
+        let test_db_name = Uuid::now_v7().to_string();
+        let app_user_password = std::env::var("DB_PICKEAT_APP_PASSWORD")
+            .expect("Missing DB_PICKEAT_APP_PASSWORD env var");
+        let migration_user_password =
+            std::env::var("DB_PICKEAT_PASSWORD").expect("Missing DB_PICKEAT_PASSWORD env var");
+
+        let db_conn_string = format!(
+            "postgres://pickeat_app:{}@127.0.0.1:5432/{}",
+            app_user_password, test_db_name
+        );
+
+        let app_conf = TestAppConf {
+            test_db_name,
+            app_user_password,
+            migration_user_password,
+        };
+        let mut conf_file = tempfile::NamedTempFile::new().unwrap();
+        app_conf.write_into(&mut conf_file).unwrap();
+
+        cmd.args(["--conf", conf_file.path().to_str().unwrap()]);
+        cmd.stdout(Stdio::null());
+
+        let process = cmd.spawn().expect("Error while running TestApp");
+        let port = TestApp::fetch_listening_port(&port_file)
+            .expect("Unable to retrieve listening port from temp file");
+        let api_base_url = format!("http://127.0.0.1:{port}");
+
+        Self {
+            process,
+            db_conn_string,
+            api_base_url,
+        }
+    }
+
+    fn fetch_listening_port(port_file: &NamedTempFile) -> Result<u16, &'static str> {
+        let mut port = None;
+
+        for _ in 0..50 {
+            if let Ok(content) = fs::read_to_string(port_file)
+                && let Ok(p) = content.trim().parse::<u16>()
+            {
+                port = Some(p);
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(100));
+        }
+        port.ok_or("Unable to retrieve app listening port")
+    }
+
+    pub async fn open_db_conn(&self) -> PgConnection {
+        PgConnection::connect(&self.db_conn_string).await.unwrap()
+    }
+
+    pub fn api_base_url(&self) -> &str {
+        &self.api_base_url
+    }
+}
+
+#[derive(Template)]
+#[template(
+    ext = "txt",
+    source = r#"
+[http]
+ip = "127.0.0.1"
+port = 0
+
+[db]
+host = "localhost"
+port = 5432
+name = "{{ test_db_name }}"
+
+[db.app_user]
+name = "pickeat_app"
+password = "{{ app_user_password }}"
+
+[db.migration_user]
+name = "pickeat"
+password = "{{ migration_user_password }}"
+    "#
+)]
+struct TestAppConf {
+    test_db_name: String,
+    app_user_password: String,
+    migration_user_password: String,
+}
