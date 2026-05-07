@@ -2,7 +2,7 @@ mod common;
 use common::TestApp;
 
 #[tokio::test]
-async fn isalive_works() {
+async fn isalive() {
     let app = TestApp::new();
     let client = reqwest::Client::new();
 
@@ -17,7 +17,7 @@ async fn isalive_works() {
 }
 
 #[tokio::test]
-async fn add_recipe_returns_200_with_valid_data() {
+async fn add_recipe() {
     let app = TestApp::new();
     let client = reqwest::Client::new();
     let mut db_conn = app.open_db_conn().await;
@@ -42,7 +42,7 @@ async fn add_recipe_returns_200_with_valid_data() {
 }
 
 #[tokio::test]
-async fn add_recipe_returns_422_when_data_is_missing() {
+async fn add_recipe_with_missing_data() {
     let app = TestApp::new();
     let client = reqwest::Client::new();
     let mut db_conn = app.open_db_conn().await;
