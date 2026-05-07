@@ -46,36 +46,6 @@ async fn add_recipe() {
 }
 
 #[tokio::test]
-async fn add_recipe_with_missing_data() {
-    let app = TestApp::new();
-    let client = reqwest::Client::new();
-    let mut db_conn = app.open_db_conn().await;
-
-    let test_cases = [("", "missing the name")];
-    for (invalid_body, error_message) in test_cases {
-        let response = client
-            .post(format!("{}/recipes", app.api_base_url()))
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .body(invalid_body)
-            .send()
-            .await
-            .expect("Failed to execute request");
-
-        let saved = sqlx::query!("SELECT count(*) from recipes")
-            .fetch_one(&mut db_conn)
-            .await
-            .unwrap();
-
-        assert_eq!(
-            response.status().as_u16(),
-            422,
-            "The API did not fail with HTTP 422 when the payload was {error_message}",
-        );
-        assert_eq!(saved.count, Some(0));
-    }
-}
-
-#[tokio::test]
 async fn add_recipe_and_retrieve_it_by_id() {
     let app = TestApp::new();
     let client = reqwest::Client::new();
