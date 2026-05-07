@@ -25,4 +25,5 @@ uuid = { version = "1.23.1", features = [ "v7", "serde"] }
 
 [dev-dependencies]
 dotenv = "0.15.0"
+serde_qs = "1.1.1"
 tempfile = "3.20.0"

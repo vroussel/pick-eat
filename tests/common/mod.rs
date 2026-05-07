@@ -1,4 +1,7 @@
+pub mod inputs;
+
 use askama::Template;
+use serde::Serialize;
 use sqlx::{Connection, PgConnection};
 use std::{
     fs,
@@ -118,4 +121,10 @@ struct TestAppConf {
     test_db_name: String,
     app_user_password: String,
     migration_user_password: String,
+}
+
+pub fn url_encode_form<T: Serialize>(value: T) -> Result<String, serde_qs::Error> {
+    serde_qs::Config::new()
+        .use_form_encoding(true)
+        .serialize_string(&value)
 }

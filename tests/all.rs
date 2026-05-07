@@ -1,5 +1,5 @@
 mod common;
-use common::TestApp;
+use common::*;
 
 #[tokio::test]
 async fn isalive() {
@@ -22,7 +22,11 @@ async fn add_recipe() {
     let client = reqwest::Client::new();
     let mut db_conn = app.open_db_conn().await;
 
-    let body = "name=pizza%204%20fromages";
+    let new_recipe = inputs::NewRecipe {
+        name: "pizza 4 fromages".to_string(),
+    };
+
+    let body = url_encode_form(&new_recipe).unwrap();
     let response = client
         .post(format!("{}/recipes", app.api_base_url()))
         .header("Content-Type", "application/x-www-form-urlencoded")
@@ -38,7 +42,7 @@ async fn add_recipe() {
 
     assert_eq!(response.status().as_u16(), 200);
     assert_eq!(recipes.len(), 1);
-    assert_eq!(recipes[0].name, "pizza 4 fromages");
+    assert_eq!(recipes[0].name, new_recipe.name);
 }
 
 #[tokio::test]
