@@ -74,3 +74,41 @@ async fn add_recipe_with_missing_data() {
         assert_eq!(saved.count, Some(0));
     }
 }
+
+#[tokio::test]
+async fn add_recipe_and_retrieve_it_by_id() {
+    let app = TestApp::new();
+    let client = reqwest::Client::new();
+    let mut db_conn = app.open_db_conn().await;
+
+    let new_recipe = inputs::NewRecipe {
+        name: "pizza 4 fromages".to_string(),
+    };
+
+    let body = url_encode_form(&new_recipe).unwrap();
+    client
+        .post(format!("{}/recipes", app.api_base_url()))
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .body(body)
+        .send()
+        .await
+        .expect("Failed to execute request");
+
+    let recipe_id = sqlx::query!("SELECT id from recipes")
+        .fetch_one(&mut db_conn)
+        .await
+        .unwrap()
+        .id;
+
+    let response = client
+        .get(format!("{}/recipes/{recipe_id}", app.api_base_url()))
+        .send()
+        .await
+        .expect("Failed to execute request");
+
+    assert_eq!(response.status().as_u16(), 200);
+    assert!(
+        response.text().await.unwrap().contains(&new_recipe.name),
+        "GET /recipes/<id> response body did not contain recipe name"
+    );
+}
