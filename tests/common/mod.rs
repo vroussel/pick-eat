@@ -16,6 +16,7 @@ pub struct TestApp {
     process: Child,
     db_conn_string: String,
     api_base_url: String,
+    _conf_file: NamedTempFile,
 }
 
 impl Drop for TestApp {
@@ -68,6 +69,7 @@ impl TestApp {
             process,
             db_conn_string,
             api_base_url,
+            _conf_file: conf_file,
         }
     }
 
