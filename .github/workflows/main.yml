@@ -25,7 +25,7 @@ jobs:
       run: |
         echo "DATABASE_URL=postgres://pickeat:${DB_PICKEAT_PASSWORD}@localhost:5432/pickeat" >> $GITHUB_ENV
     - name: Launch db container
-      run: docker compose -f compose/ci.yml --project-directory . up -d
+      run: docker compose --file compose/ci.yml --project-directory . up --detach --wait
     - name: Install sqlx-cli
       run: cargo install sqlx-cli --no-default-features --features postgres
     - name: Run SQL migrations
@@ -70,7 +70,7 @@ jobs:
             type=registry,ref=ghcr.io/vroussel/pick-eat-cache:${{ github.ref_name }}
             type=registry,ref=ghcr.io/vroussel/pick-eat-cache:v2
     - name: Launch db container
-      run: docker compose -f compose/ci.yml --project-directory . up -d
+      run: docker compose --file compose/ci.yml --project-directory . up --detach --wait
     - name: Run tests
       run: docker run --rm -e DB_PICKEAT_APP_PASSWORD -e DB_PICKEAT_PASSWORD --network=host builder cargo test
 
