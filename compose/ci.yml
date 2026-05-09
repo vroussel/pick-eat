@@ -2,9 +2,9 @@ services:
   postgres:
     build: ./db
     environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_superuser_password
-      DB_PICKEAT_PASSWORD_FILE: /run/secrets/db_pickeat_password
-      DB_PICKEAT_APP_PASSWORD_FILE: /run/secrets/db_pickeat_app_password
+      POSTGRES_PASSWORD: "${DB_SUPERUSER_PASSWORD}"
+      DB_PICKEAT_PASSWORD: "${DB_PICKEAT_PASSWORD}"
+      DB_PICKEAT_APP_PASSWORD: "${DB_PICKEAT_APP_PASSWORD}"
     ports:
       - "5432:5432"
     healthcheck:
@@ -14,14 +14,3 @@ services:
       retries: 10
     tmpfs:
       - /var/lib/postgresql/data
-    secrets:
-      - db_superuser_password
-      - db_pickeat_password
-      - db_pickeat_app_password
-secrets:
-  db_superuser_password:
-    environment: DB_SUPERUSER_PASSWORD
-  db_pickeat_password:
-    environment: DB_PICKEAT_PASSWORD
-  db_pickeat_app_password:
-    environment: DB_PICKEAT_APP_PASSWORD
