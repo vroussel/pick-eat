@@ -16,5 +16,5 @@ pub async fn create(
 }
 
 pub async fn retrieve(state: AppState, id: &Uuid) -> Result<Option<app::model::Recipe>, AppError> {
-    Ok(db::queries::get_recipe(&state.db_pool, &id).await?)
+    Ok(db::queries::get_recipe(&state.db_pool, id).await?)
 }
