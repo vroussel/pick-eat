@@ -2,7 +2,7 @@ pub mod inputs;
 
 use askama::Template;
 use serde::Serialize;
-use sqlx::{Connection, PgConnection};
+use sqlx::{PgPool, postgres::PgConnectOptions};
 use std::{
     fs,
     path::PathBuf,
@@ -10,11 +10,10 @@ use std::{
     time::Duration,
 };
 use tempfile::NamedTempFile;
-use uuid::Uuid;
 
 pub struct TestApp {
     process: Child,
-    db_conn_string: String,
+    db_pool: PgPool,
     api_base_url: String,
     _conf_file: NamedTempFile,
 }
@@ -26,7 +25,7 @@ impl Drop for TestApp {
 }
 
 impl TestApp {
-    pub fn new() -> Self {
+    pub async fn new(admin_db_pool: PgPool) -> Self {
         dotenv::dotenv().ok();
 
         let bin_path = PathBuf::from(env!("CARGO_BIN_EXE_pickeat-server"));
@@ -38,20 +37,21 @@ impl TestApp {
             port_file.path().to_str().unwrap(),
         );
 
-        let test_db_name = format!("__test__{}", Uuid::now_v7());
+        let test_db_name = sqlx::query!("SELECT current_database()")
+            .fetch_one(&admin_db_pool)
+            .await
+            .ok()
+            .and_then(|r| r.current_database)
+            .expect("Unable to retrieve db name from test DB");
+
         let app_user_password = std::env::var("DB_PICKEAT_APP_PASSWORD")
             .expect("Missing DB_PICKEAT_APP_PASSWORD env var");
         let migration_user_password =
             std::env::var("DB_PICKEAT_PASSWORD").expect("Missing DB_PICKEAT_PASSWORD env var");
 
-        let db_conn_string = format!(
-            "postgres://pickeat_app:{}@127.0.0.1:5432/{}",
-            app_user_password, test_db_name
-        );
-
         let app_conf = TestAppConf {
             test_db_name,
-            app_user_password,
+            app_user_password: app_user_password.clone(),
             migration_user_password,
         };
         let mut conf_file = tempfile::NamedTempFile::new().unwrap();
@@ -65,9 +65,16 @@ impl TestApp {
             .expect("Unable to retrieve listening port from temp file");
         let api_base_url = format!("http://127.0.0.1:{port}");
 
+        let app_db_pool = admin_db_pool;
+        app_db_pool.set_connect_options(
+            PgConnectOptions::new()
+                .username("pickeat_app")
+                .password(&app_user_password),
+        );
+
         Self {
             process,
-            db_conn_string,
+            db_pool: app_db_pool,
             api_base_url,
             _conf_file: conf_file,
         }
@@ -88,12 +95,12 @@ impl TestApp {
         port.ok_or("Unable to retrieve app listening port")
     }
 
-    pub async fn open_db_conn(&self) -> PgConnection {
-        PgConnection::connect(&self.db_conn_string).await.unwrap()
-    }
-
     pub fn api_base_url(&self) -> &str {
         &self.api_base_url
+    }
+
+    pub fn db_pool(&self) -> &PgPool {
+        &self.db_pool
     }
 }
 

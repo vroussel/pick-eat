@@ -1,9 +1,10 @@
 mod common;
 use common::*;
+use sqlx::PgPool;
 
-#[tokio::test]
-async fn isalive() {
-    let app = TestApp::new();
+#[sqlx::test(migrations = false)]
+async fn isalive(admin_db_pool: PgPool) {
+    let app = TestApp::new(admin_db_pool).await;
     let client = reqwest::Client::new();
 
     let response = client
@@ -16,11 +17,10 @@ async fn isalive() {
     assert_eq!(response.content_length(), Some(0));
 }
 
-#[tokio::test]
-async fn add_recipe() {
-    let app = TestApp::new();
+#[sqlx::test(migrations = false)]
+async fn add_recipe(admin_db_pool: PgPool) {
+    let app = TestApp::new(admin_db_pool).await;
     let client = reqwest::Client::new();
-    let mut db_conn = app.open_db_conn().await;
 
     let new_recipe = inputs::NewRecipe {
         name: "pizza 4 fromages".to_string(),
@@ -36,7 +36,7 @@ async fn add_recipe() {
         .expect("Failed to execute request");
 
     let recipes = sqlx::query!("SELECT name from recipes")
-        .fetch_all(&mut db_conn)
+        .fetch_all(app.db_pool())
         .await
         .unwrap();
 
@@ -45,11 +45,10 @@ async fn add_recipe() {
     assert_eq!(recipes[0].name, new_recipe.name);
 }
 
-#[tokio::test]
-async fn add_recipe_and_retrieve_it_by_id() {
-    let app = TestApp::new();
+#[sqlx::test(migrations = false)]
+async fn add_recipe_and_retrieve_it_by_id(admin_db_pool: PgPool) {
+    let app = TestApp::new(admin_db_pool).await;
     let client = reqwest::Client::new();
-    let mut db_conn = app.open_db_conn().await;
 
     let new_recipe = inputs::NewRecipe {
         name: "pizza 4 fromages".to_string(),
@@ -65,7 +64,7 @@ async fn add_recipe_and_retrieve_it_by_id() {
         .expect("Failed to execute request");
 
     let recipe_id = sqlx::query!("SELECT id from recipes")
-        .fetch_one(&mut db_conn)
+        .fetch_one(app.db_pool())
         .await
         .unwrap()
         .id;
