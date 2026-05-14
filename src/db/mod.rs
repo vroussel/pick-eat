@@ -29,9 +29,7 @@ pub(crate) async fn init(conf: &DBConf) -> Result<PgPool, sqlx::Error> {
 
     let mut opts: PgConnectOptions = db_app_url.parse()?;
 
-    opts = opts
-        .log_statements(LevelFilter::Debug)
-        .log_slow_statements(LevelFilter::Warn, Duration::from_millis(500));
+    opts = opts.log_slow_statements(LevelFilter::Warn, Duration::from_millis(500));
 
     PgPoolOptions::new()
         .max_connections(5)
