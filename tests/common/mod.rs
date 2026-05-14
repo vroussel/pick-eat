@@ -57,8 +57,10 @@ impl TestApp {
         let mut conf_file = tempfile::NamedTempFile::new().unwrap();
         app_conf.write_into(&mut conf_file).unwrap();
 
-        cmd.args(["--conf", conf_file.path().to_str().unwrap()]);
-        cmd.stdout(Stdio::null());
+        cmd.args(["--conf", conf_file.path().to_str().unwrap(), "-vv"]);
+        if std::env::var("TEST_LOG").is_err() {
+            cmd.stdout(Stdio::null());
+        }
 
         let process = cmd.spawn().expect("Error while running TestApp");
         let port = TestApp::fetch_listening_port(&port_file)
