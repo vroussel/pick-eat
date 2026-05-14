@@ -1,9 +1,13 @@
 pub mod queries;
 
+use std::time::Duration;
+
 use sqlx::{
-    Connection, PgConnection, PgPool, Postgres, migrate, migrate::MigrateDatabase,
-    postgres::PgPoolOptions,
+    ConnectOptions, Connection, PgConnection, PgPool, Postgres, migrate,
+    migrate::MigrateDatabase,
+    postgres::{PgConnectOptions, PgPoolOptions},
 };
+use tracing::log::LevelFilter;
 
 use crate::conf::DBConf;
 pub(crate) async fn init(conf: &DBConf) -> Result<PgPool, sqlx::Error> {
@@ -23,8 +27,14 @@ pub(crate) async fn init(conf: &DBConf) -> Result<PgPool, sqlx::Error> {
         conf.app_user.name, conf.app_user.password, conf.host, conf.port, conf.name
     );
 
+    let mut opts: PgConnectOptions = db_app_url.parse()?;
+
+    opts = opts
+        .log_statements(LevelFilter::Debug)
+        .log_slow_statements(LevelFilter::Warn, Duration::from_millis(500));
+
     PgPoolOptions::new()
         .max_connections(5)
-        .connect(&db_app_url)
+        .connect_with(opts)
         .await
 }
