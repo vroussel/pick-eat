@@ -6,6 +6,7 @@ use axum::{
     routing::{get, post},
 };
 use clap::Parser;
+use reqwest::StatusCode;
 use sqlx::PgPool;
 use thiserror::Error;
 use tower::ServiceBuilder;
@@ -39,6 +40,8 @@ struct AppState {
 enum AppError {
     #[error("Database error: {0}")]
     DBError(#[from] sqlx::Error),
+    #[error("Template rendering error: {0}")]
+    RenderError(#[from] askama::Error),
 }
 
 #[tokio::main]

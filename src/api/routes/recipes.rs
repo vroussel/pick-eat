@@ -3,7 +3,7 @@ use askama::Template;
 use axum::{
     Form,
     extract::{Path, State},
-    response::IntoResponse,
+    response::{Html, IntoResponse},
 };
 
 use reqwest::StatusCode;
@@ -31,8 +31,12 @@ pub async fn get(
     State(state): State<AppState>,
     Path(recipe_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, AppError> {
-    Ok(match app::recipes::retrieve(state, &recipe_id).await? {
-        Some(r) => (StatusCode::OK, RecipePage { recipe: r }.render().unwrap()),
-        None => (StatusCode::NOT_FOUND, "".to_string()),
-    })
+    let recipe = app::recipes::retrieve(state, &recipe_id).await?;
+
+    let response = match recipe {
+        Some(r) => (StatusCode::OK, Html(RecipePage { recipe: r }.render()?)),
+        None => (StatusCode::NOT_FOUND, api::not_found_page()?),
+    };
+
+    Ok(response)
 }
