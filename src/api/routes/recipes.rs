@@ -7,6 +7,7 @@ use axum::{
 };
 
 use reqwest::StatusCode;
+use tracing::debug;
 use uuid::Uuid;
 
 use crate::AppError;
@@ -15,6 +16,7 @@ pub(crate) async fn post(
     State(state): State<AppState>,
     Form(new_recipe): Form<api::model::NewRecipe>,
 ) -> Result<StatusCode, AppError> {
+    debug!("{new_recipe:?}");
     app::recipes::create(state, new_recipe).await?;
     Ok(StatusCode::OK)
 }
