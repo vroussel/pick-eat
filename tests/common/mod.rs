@@ -6,7 +6,7 @@ use sqlx::{PgPool, postgres::PgConnectOptions};
 use std::{
     fs,
     path::PathBuf,
-    process::{Child, Command, Stdio},
+    process::{Child, Command},
     time::Duration,
 };
 use tempfile::NamedTempFile;
@@ -36,6 +36,10 @@ impl TestApp {
             "TEST_LISTENING_PORT_FILE",
             port_file.path().to_str().unwrap(),
         );
+        cmd.env(
+            "RUST_LOG",
+            std::env::var("RUST_LOG").unwrap_or("off".to_string()),
+        );
 
         let test_db_name = sqlx::query!("SELECT current_database()")
             .fetch_one(&admin_db_pool)
@@ -57,10 +61,7 @@ impl TestApp {
         let mut conf_file = tempfile::NamedTempFile::new().unwrap();
         app_conf.write_into(&mut conf_file).unwrap();
 
-        cmd.args(["--conf", conf_file.path().to_str().unwrap(), "-vv"]);
-        if std::env::var("TEST_LOG").is_err() {
-            cmd.stdout(Stdio::null());
-        }
+        cmd.args(["--conf", conf_file.path().to_str().unwrap()]);
 
         let process = cmd.spawn().expect("Error while running TestApp");
         let port = TestApp::fetch_listening_port(&port_file)

@@ -26,8 +26,6 @@ mod logging;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    #[arg(short, action = clap::ArgAction::Count)]
-    verbose: u8,
     #[arg(short, long)]
     conf: PathBuf,
 }
@@ -46,7 +44,7 @@ enum AppError {
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
     let args = Args::parse();
-    logging::setup(args.verbose);
+    logging::setup();
 
     info!(
         "Starting {} v{}",
