@@ -1,6 +1,7 @@
 mod common;
 use common::*;
 use sqlx::PgPool;
+use uuid::Uuid;
 
 #[sqlx::test(migrations = false)]
 async fn isalive(admin_db_pool: PgPool) {
@@ -80,4 +81,34 @@ async fn add_recipe_and_retrieve_it_by_id(admin_db_pool: PgPool) {
         response.text().await.unwrap().contains(&new_recipe.name),
         "GET /recipes/<id> response body did not contain recipe name"
     );
+}
+
+#[sqlx::test(migrations = false)]
+async fn get_non_existing_page(admin_db_pool: PgPool) {
+    let app = TestApp::new(admin_db_pool).await;
+    let client = reqwest::Client::new();
+
+    let response = client
+        .get(format!("{}/yolo", app.api_base_url()))
+        .send()
+        .await
+        .expect("Failed to execute request");
+
+    assert_eq!(response.status().as_u16(), 404);
+}
+
+#[sqlx::test(migrations = false)]
+async fn get_non_existing_recipe(admin_db_pool: PgPool) {
+    let app = TestApp::new(admin_db_pool).await;
+    let client = reqwest::Client::new();
+
+    let random_id = Uuid::now_v7();
+
+    let response = client
+        .get(format!("{}/recipes/{random_id}", app.api_base_url()))
+        .send()
+        .await
+        .expect("Failed to execute request");
+
+    assert_eq!(response.status().as_u16(), 404);
 }
