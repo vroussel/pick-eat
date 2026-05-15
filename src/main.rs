@@ -37,7 +37,7 @@ struct AppState {
 
 #[derive(Error, Debug)]
 enum AppError {
-    #[error("Database error")]
+    #[error("Database error: {0}")]
     DBError(#[from] sqlx::Error),
 }
 
