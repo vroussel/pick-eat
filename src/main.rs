@@ -64,6 +64,7 @@ async fn main() -> Result<(), anyhow::Error> {
         .route("/isalive", get(api::routes::is_alive))
         .route("/recipes", post(api::routes::recipes::post))
         .route("/recipes/{recipe_id}", get(api::routes::recipes::get))
+        .fallback(|| async { (StatusCode::NOT_FOUND, api::not_found_page()) })
         .with_state(shared_state)
         .layer(
             ServiceBuilder::new()
