@@ -21,6 +21,7 @@ tokio = { version = "1.47.0", features = ["rt-multi-thread"] }
 toml = "0.9.5"
 tower = "0.5.3"
 tower-http = { version = "0.6.10", features = ["trace", "request-id", "util"] }
+tower-livereload = "0.10.3"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 uuid = { version = "1.23.1", features = [ "v7", "serde"] }
@@ -29,3 +30,6 @@ uuid = { version = "1.23.1", features = [ "v7", "serde"] }
 dotenv = "0.15.0"
 serde_qs = "1.1.1"
 tempfile = "3.20.0"
+
+[profile.dev.package.askama_derive]
+opt-level = 3
