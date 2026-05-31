@@ -1,2 +1,12 @@
-id: {{ recipe.id }}
-name: {{ recipe.name }}
+{% extends "base.html" %}
+
+{% block title %}{{ recipe.name }} - {{ super() }}{% endblock %}
+
+{% block content -%}
+<p>
+    id: {{ recipe.id }}
+    name: {{ recipe.name }}
+    prep_time: {{ recipe.prep_time }}
+    cook_time: {{ recipe.cook_time }}
+</p>
+{%- endblock %}

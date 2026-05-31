@@ -1,3 +1,4 @@
+mod model;
 pub mod queries;
 
 use std::time::Duration;
