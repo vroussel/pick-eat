@@ -6,10 +6,7 @@ pub async fn create(
     state: AppState,
     new_recipe: api::model::NewRecipe,
 ) -> Result<app::model::Recipe, AppError> {
-    let r = app::model::Recipe {
-        id: Uuid::now_v7(),
-        name: new_recipe.name,
-    };
+    let r = new_recipe.into();
     db::queries::insert_recipe(&state.db_pool, &r).await?;
 
     Ok(r)
