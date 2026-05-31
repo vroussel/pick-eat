@@ -1,6 +1,4 @@
-use serde::Deserialize;
-
-#[derive(Deserialize, Debug)]
+#[derive(Debug)]
 pub struct NewRecipe {
     pub name: String,
     pub prep_time: u16,
