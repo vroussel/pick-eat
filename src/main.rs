@@ -14,6 +14,7 @@ use tower_http::{
     request_id::{MakeRequestUuid, PropagateRequestIdLayer, SetRequestIdLayer},
     trace::TraceLayer,
 };
+use tower_livereload::LiveReloadLayer;
 use tracing::info;
 
 use crate::conf::AppConf;
@@ -66,6 +67,7 @@ async fn main() -> Result<(), anyhow::Error> {
         .route("/recipes/{recipe_id}", get(api::routes::recipes::get))
         .fallback(|| async { (StatusCode::NOT_FOUND, api::not_found_page()) })
         .with_state(shared_state)
+        .layer(LiveReloadLayer::new())
         .layer(
             ServiceBuilder::new()
                 .layer(SetRequestIdLayer::x_request_id(MakeRequestUuid))
