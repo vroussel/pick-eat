@@ -16,22 +16,41 @@
 
 {% block content -%}
 <form method="post" autocomplete="off" class="flex flex-col mx-auto max-w-md space-y-2">
+    {% let oninput = "oninput=closest('div').querySelector('.text-error').remove()" %}
+
     {% let label = "Nom de la recette" %}
     {% call field(label, errors.name) %}
-        <input name="name" type="text" placeholder="{{ label }}" class="input input-md"
-            oninput="closest('div').querySelector('.text-error').remove()" value="{{ input.name }}">
+        <input name="name"
+            type="text"
+            placeholder="{{ label }}"
+            class="input input-md"
+            value="{{ input.name }}"
+            {{ oninput }}
+        >
     {% endcall %}
 
     {% let label = "Temps de préparation (en minutes)" %}
     {% call field(label, errors.prep_time) %}
-        <input name="prep_time" type="number" placeholder="{{ label }}" class="input input-md" min="0"
-            oninput="closest('div').querySelector('.text-error').remove()" value="{{ input.prep_time }}">
+        <input name="prep_time"
+            type="number"
+            placeholder="{{ label }}"
+            class="input input-md"
+            min="0"
+            value="{{ input.prep_time }}"
+            {{ oninput }}
+        >
     {% endcall %}
 
     {% let label = "Temps de cuisson (en minutes)" %}
     {% call field(label, errors.cook_time) %}
-        <input name="cook_time" type="number" placeholder="{{ label }}" class="input input-md" min="0"
-            oninput="closest('div').querySelector('.text-error').remove()" value="{{ input.cook_time }}">
+        <input name="cook_time"
+            type="number"
+            placeholder="{{ label }}"
+            class="input input-md"
+            min="0"
+            value="{{ input.cook_time }}"
+            {{ oninput }}
+        >
     {% endcall %}
 
     <input type="submit" value="Submit" class="btn" />
