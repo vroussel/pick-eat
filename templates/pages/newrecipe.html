@@ -2,12 +2,11 @@
 
 {% block title %}Ajouter une recette - {{ super() }}{% endblock %}
 
-{% macro field(name, type, label, error, input, extra_attrs = "") %}
+{% macro field(label, error) %}
 <div>
     <label class="floating-label">
         <span>{{ label }}</span>
-        <input name="{{ name }}" type="{{ type }}" placeholder="{{ label }}" class="input input-md"
-            oninput="closest('div').querySelector('.text-error').remove()" value="{{ input }}" {{ extra_attrs }} />
+        {{ caller() }}
     </label>
     {% if let Some(err) = error %}
     <p class="text-error text-sm">{{ err }}</p>
@@ -17,10 +16,24 @@
 
 {% block content -%}
 <form method="post" autocomplete="off" class="flex flex-col mx-auto max-w-md space-y-2">
-    {{ field("name", "text", "Nom de la recette", errors.name, input.name) }}
-    {{ field("prep_time", "number", "Temps de préparation (en minutes)", errors.prep_time, input.prep_time, "min=0")
-    }}
-    {{ field("cook_time", "number", "Temps de cuisson (en minutes)", errors.cook_time, input.cook_time, "") }}
+    {% let label = "Nom de la recette" %}
+    {% call field(label, errors.name) %}
+        <input name="name" type="text" placeholder="{{ label }}" class="input input-md"
+            oninput="closest('div').querySelector('.text-error').remove()" value="{{ input.name }}">
+    {% endcall %}
+
+    {% let label = "Temps de préparation (en minutes)" %}
+    {% call field(label, errors.prep_time) %}
+        <input name="prep_time" type="number" placeholder="{{ label }}" class="input input-md" min="0"
+            oninput="closest('div').querySelector('.text-error').remove()" value="{{ input.prep_time }}">
+    {% endcall %}
+
+    {% let label = "Temps de cuisson (en minutes)" %}
+    {% call field(label, errors.cook_time) %}
+        <input name="cook_time" type="number" placeholder="{{ label }}" class="input input-md" min="0"
+            oninput="closest('div').querySelector('.text-error').remove()" value="{{ input.cook_time }}">
+    {% endcall %}
+
     <input type="submit" value="Submit" class="btn" />
 </form>
 {%- endblock %}
