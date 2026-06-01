@@ -10,7 +10,7 @@ use askama::Template;
 use axum::{
     Form,
     extract::{Path, State},
-    response::{Html, IntoResponse, Redirect},
+    response::{Html, IntoResponse},
 };
 
 use reqwest::StatusCode;
@@ -35,7 +35,8 @@ pub(crate) async fn post(
     match NewRecipe::try_from(new_recipe.clone()) {
         Ok(v) => {
             let recipe = app::recipes::create(state, v).await?;
-            Ok(Redirect::to(&format!("/recipes/{}", recipe.id)).into_response())
+            let recipe_uri = format!("/recipes/{}", recipe.id);
+            Ok((StatusCode::OK, [("hx-redirect", &recipe_uri)]).into_response())
         }
         Err(e) => {
             let response = Html(
