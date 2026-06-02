@@ -8,8 +8,7 @@ use crate::{
 };
 use askama::Template;
 use axum::{
-    Form,
-    extract::{Path, State},
+    extract::{Multipart, Path, State},
     response::{Html, IntoResponse},
 };
 
@@ -29,8 +28,17 @@ struct RecipeForm {
 #[axum::debug_handler]
 pub(crate) async fn post(
     State(state): State<AppState>,
-    Form(new_recipe): Form<RecipeFormInput>,
+    mut multipart: Multipart,
 ) -> Result<impl IntoResponse, AppError> {
+    let mut new_recipe = RecipeFormInput::default();
+    while let Some(field) = multipart.next_field().await.unwrap() {
+        match field.name() {
+            Some("name") => new_recipe.name = field.text().await.unwrap(),
+            Some("prep_time") => new_recipe.prep_time = field.text().await.unwrap(),
+            Some("cook_time") => new_recipe.cook_time = field.text().await.unwrap(),
+            _ => {}
+        }
+    }
     debug!("{new_recipe:?}");
     match NewRecipe::try_from(new_recipe.clone()) {
         Ok(v) => {

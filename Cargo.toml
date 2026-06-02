@@ -10,7 +10,7 @@ lto = "thin"
 [dependencies]
 anyhow = "1.0.98"
 askama = { version = "0.16.0", features = ["code-in-doc"] }
-axum = { version = "0.8.4", features = ["http2", "macros"] }
+axum = { version = "0.8.4", features = ["http2", "macros", "multipart"] }
 clap = { version = "4.5.41", features = ["derive"] }
 openssl = { version = "0.10.73", features = ["vendored"] }
 reqwest = "0.12.22"
