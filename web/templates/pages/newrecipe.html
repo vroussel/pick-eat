@@ -20,8 +20,6 @@
 
 {% block content -%}
 <form hx-post hx-swap="outerHTML" autocomplete="off" enctype="multipart/form-data" class="flex flex-col mx-auto max-w-md space-y-2">
-    {% let oninput = "oninput=closest('div').querySelector('.text-error')?.remove();this.classList.remove('input-error')" %}
-
     {% let label = "Nom de la recette" %}
     {% call field(label, errors.name) %}
         <input name="name"
@@ -29,7 +27,7 @@
             placeholder="{{ label }}"
             class="input input-md {{ error_class(errors.name) }}"
             value="{{ input.name }}"
-            {{ oninput }}
+            oninput="reset_input_error(this)"
         >
     {% endcall %}
 
@@ -41,7 +39,7 @@
             class="input input-md {{ error_class(errors.prep_time) }}"
             min="0"
             value="{{ input.prep_time }}"
-            {{ oninput }}
+            oninput="reset_input_error(this)"
         >
     {% endcall %}
 
@@ -53,7 +51,7 @@
             class="input input-md {{ error_class(errors.cook_time) }}"
             min="0"
             value="{{ input.cook_time }}"
-            {{ oninput }}
+            oninput="reset_input_error(this)"
         >
     {% endcall %}
 
