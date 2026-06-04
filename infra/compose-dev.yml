@@ -1,5 +1,16 @@
 ---
 services:
+  nginx:
+    build:
+      dockerfile: ./infra/nginx/Dockerfile
+    network_mode: host
+    volumes: [./infra/nginx/dev/conf.d/:/etc/nginx/conf.d]
+    develop:
+      watch:
+        - action: rebuild
+          path: ./infra/nginx/
+        - action: rebuild
+          path: ./web/assets/
   postgres:
     build: ./infra/postgres
     environment:
