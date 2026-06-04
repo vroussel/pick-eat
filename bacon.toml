@@ -81,7 +81,7 @@ on_success = "back" # so that we don't open the browser at each change
 [jobs.run]
 command = [
     "cargo", "run",
-    "--", "--conf", "config/dev.toml"
+    "--", "--conf", "pickeat-dev.toml"
     # put launch parameters for your program behind a `--` separator
 ]
 need_stdout = true
@@ -101,14 +101,14 @@ background = true
 [jobs.run-long]
 command = [
     "cargo", "run",
-    "--", "--conf", "config/dev.toml"
+    "--", "--conf", "pickeat-dev.toml"
     # put launch parameters for your program behind a `--` separator
 ]
 need_stdout = true
 allow_warnings = true
 background = false
 on_change_strategy = "kill_then_restart"
-watch = ["templates"]
+watch = ["web/templates"]
 # kill = ["pkill", "-TERM", "-P"]
 
 # This parameterized job runs the example of your choice, as soon

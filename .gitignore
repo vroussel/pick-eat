@@ -2,4 +2,4 @@ tags
 todo
 target
 .env
-config/dev.toml
+pickeat-dev.toml

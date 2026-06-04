@@ -22,7 +22,7 @@ RUN mkdir -p src && \
     echo "fn main() {}" > src/main.rs && \
     cargo fetch --locked
 COPY \
-    src db templates tests \
+    src db web tests \
     .
 RUN cargo build --locked --release
 RUN cargo install --locked --path . --root /out
