@@ -1,1 +1,12 @@
-Whoops, not found :)
+{% extends "base.html" %}
+
+{% block title %}Vous êtes perdu ? - {{ super() }}{% endblock %}
+{% block content -%}
+<div class="flex flex-col items-center text-center pt-24">
+    <img src="/assets/404_travolta.webp" alt="travolta confused meme from Pulp Fiction" />
+    <div class="mt-5">
+        <span class="opacity-70">Cette page n'existe pas, </span>
+        <a class="link link-primary" href="/">retourner à l'accueil</a>
+    </div>
+</div>
+{% endblock %}
