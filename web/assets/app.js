@@ -1,8 +1,3 @@
-function reset_input_error(el) {
-    el.closest('div').querySelector('.text-error')?.remove()
-    el.classList.remove('input-error')
-}
-
 function showToast(message, type='error') {
     const alert = document.createElement('div');
     alert.className = `alert alert-${type}`;

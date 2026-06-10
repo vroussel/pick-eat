@@ -19,42 +19,45 @@
 {% endmacro %}
 
 {% block content -%}
-<form hx-post hx-swap="outerHTML" autocomplete="off" enctype="multipart/form-data" class="flex flex-col mx-auto max-w-md space-y-2">
+<form hx-post hx-swap="outerHTML" autocomplete="off" enctype="multipart/form-data"
+    class="flex flex-col mx-auto max-w-md space-y-2">
     {% let label = "Nom de la recette" %}
     {% call field(label, errors.name) %}
-        <input name="name"
-            type="text"
-            placeholder="{{ label }}"
-            class="input input-md {{ error_class(errors.name) }}"
-            value="{{ input.name }}"
-            oninput="reset_input_error(this)"
-        >
+    <input name="name" type="text" placeholder="{{ label }}" class="input input-md {{ error_class(errors.name) }}"
+        value="{{ input.name }}" oninput="reset_input_error(this)">
     {% endcall %}
 
     {% let label = "Temps de préparation (en minutes)" %}
     {% call field(label, errors.prep_time) %}
-        <input name="prep_time"
-            type="number"
-            placeholder="{{ label }}"
-            class="input input-md {{ error_class(errors.prep_time) }}"
-            min="0"
-            value="{{ input.prep_time }}"
-            oninput="reset_input_error(this)"
-        >
+    <input name="prep_time" type="number" placeholder="{{ label }}"
+        class="input input-md {{ error_class(errors.prep_time) }}" min="0" value="{{ input.prep_time }}"
+        oninput="reset_input_error(this)">
     {% endcall %}
 
     {% let label = "Temps de cuisson (en minutes)" %}
     {% call field(label, errors.cook_time) %}
-        <input name="cook_time"
-            type="number"
-            placeholder="{{ label }}"
-            class="input input-md {{ error_class(errors.cook_time) }}"
-            min="0"
-            value="{{ input.cook_time }}"
-            oninput="reset_input_error(this)"
-        >
+    <input name="cook_time" type="number" placeholder="{{ label }}"
+        class="input input-md {{ error_class(errors.cook_time) }}" min="0" value="{{ input.cook_time }}"
+        oninput="reset_input_error(this)">
     {% endcall %}
 
+    {% call field("Photo", errors.image) %}
+    <input hx-preserve id="image-input" name="image" type="file"
+        class="file-input file-input-md {{ error_class(errors.image) }}" min="0" value="{{ input.cook_time }}"
+        oninput="reset_input_error(this)">
+    {% endcall %}
+    <img hx-preserve id="image-preview" class="block max-w-xs cursor-pointer" onclick="edit_crop()" hidden="true"
+        src="#" alt="Prévisualisation de la photo de la recette, après crop">
     <input type="submit" value="Submit" class="btn" />
 </form>
+<dialog class="modal">
+    <div class="modal-box p-0">
+        <div class="flex justify-end items-center p-2">
+            <button onclick="validate_crop()" class="btn btn-primary w-full">Valider</button>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button onclick="cancel_crop()">close</button>
+    </form>
+</dialog>
 {%- endblock %}

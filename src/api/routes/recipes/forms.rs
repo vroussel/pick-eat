@@ -1,3 +1,8 @@
+use std::io::Cursor;
+
+use axum::body::Bytes;
+use derive_more::Debug;
+use image::{DynamicImage, ImageReader};
 use serde::Deserialize;
 
 use crate::api;
@@ -7,6 +12,9 @@ pub struct RecipeFormInput {
     pub name: String,
     pub prep_time: String,
     pub cook_time: String,
+    #[serde(skip)]
+    #[debug(skip)]
+    pub image: Bytes,
 }
 
 #[derive(Debug, Default)]
@@ -14,12 +22,14 @@ pub struct RecipeFormErrors {
     pub name: Option<&'static str>,
     pub prep_time: Option<&'static str>,
     pub cook_time: Option<&'static str>,
+    pub image: Option<&'static str>,
 }
 
 pub struct RecipeFormValidator {
     pub name: Result<String, &'static str>,
     pub prep_time: Result<u16, &'static str>,
     pub cook_time: Result<u16, &'static str>,
+    pub image: Result<DynamicImage, &'static str>,
 }
 
 impl TryFrom<RecipeFormInput> for api::model::NewRecipe {
@@ -49,22 +59,31 @@ impl TryFrom<RecipeFormInput> for api::model::NewRecipe {
             },
         };
 
+        let image = ImageReader::new(Cursor::new(value.image))
+            .with_guessed_format()
+            .ok()
+            .and_then(|r| r.decode().ok())
+            .ok_or("Image invalide");
+
         let rv = RecipeFormValidator {
             name,
             prep_time,
             cook_time,
+            image,
         };
 
-        match (rv.name, rv.prep_time, rv.cook_time) {
-            (Ok(name), Ok(prep_time), Ok(cook_time)) => Ok(api::model::NewRecipe {
+        match (rv.name, rv.prep_time, rv.cook_time, rv.image) {
+            (Ok(name), Ok(prep_time), Ok(cook_time), Ok(image)) => Ok(api::model::NewRecipe {
                 name,
                 prep_time,
                 cook_time,
+                image,
             }),
-            (name, prep_time, cook_time) => Err(RecipeFormErrors {
+            (name, prep_time, cook_time, image) => Err(RecipeFormErrors {
                 name: name.err(),
                 prep_time: prep_time.err(),
                 cook_time: cook_time.err(),
+                image: image.err(),
             }),
         }
     }

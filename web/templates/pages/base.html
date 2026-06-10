@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
+
+<head>
     <title>{% block title %}Pickeat{% endblock %}</title>
     <meta charset="utf-8">
-    <meta
-        name="htmx-config"
-        content='{
+    <meta name="htmx-config" content='{
             "responseHandling":[
                 {"code":"204", "swap": false},
                 {"code":"[23]..", "swap": true},
@@ -13,19 +12,29 @@
                 {"code":"[45]..", "swap": false, "error":true},
                 {"code":"...", "swap": true}
             ]
-        }'
-    />
+        }' />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.js" integrity="sha384-Q+Dky3iHVJOr6wUjQ4ulh6uQ76an/t+ak1+PjMVaxRjbZamFLAG+u9InkfjbsEQf" crossorigin="anonymous"></script>
-  </head>
-  <body>
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.js"
+        integrity="sha384-Q+Dky3iHVJOr6wUjQ4ulh6uQ76an/t+ak1+PjMVaxRjbZamFLAG+u9InkfjbsEQf"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"
+        integrity="sha512-JyCZjCOZoyeQZSd5+YEAcFgz2fowJ1F1hyJOXgtKu4llIa0KneLcidn5bwfutiehUTiOuK87A986BZJMko0eWQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"
+        integrity="sha512-UtLOu9C7NuThQhuXXrGwx9Jb/z9zPQJctuAgNUBK3Z6kkSYT9wJ+2+dh6klS+TDBCV9kNPBbAxbVD+vCcfGPaA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
     <div id="content" class="m-4">
-{% block content %}{% endblock %}
+        {% block content %}{% endblock %}
     </div>
     <div id="toast" class='toast toast-top toast-end'>
     </div>
     <script src="assets/app.js"></script>
-  </body>
+    <script src="assets/recipe_form.js"></script>
+</body>
+
 </html>

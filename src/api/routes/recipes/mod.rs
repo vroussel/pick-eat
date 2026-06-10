@@ -1,4 +1,5 @@
 mod forms;
+
 use forms::*;
 
 use crate::{
@@ -25,6 +26,8 @@ struct RecipeForm {
     errors: RecipeFormErrors,
 }
 
+enum ParseImageError {}
+
 #[axum::debug_handler]
 pub(crate) async fn post(
     State(state): State<AppState>,
@@ -36,9 +39,11 @@ pub(crate) async fn post(
             Some("name") => new_recipe.name = field.text().await.unwrap(),
             Some("prep_time") => new_recipe.prep_time = field.text().await.unwrap(),
             Some("cook_time") => new_recipe.cook_time = field.text().await.unwrap(),
+            Some("image") => new_recipe.image = field.bytes().await.unwrap(),
             _ => {}
         }
     }
+
     debug!("{new_recipe:?}");
     match NewRecipe::try_from(new_recipe.clone()) {
         Ok(v) => {
