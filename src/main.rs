@@ -23,6 +23,7 @@ mod api;
 mod app;
 mod conf;
 mod db;
+mod images;
 mod logging;
 
 #[derive(Parser, Debug)]

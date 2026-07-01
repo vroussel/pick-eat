@@ -2,10 +2,11 @@ use std::io::Cursor;
 
 use axum::body::Bytes;
 use derive_more::Debug;
-use image::{DynamicImage, ImageReader};
+use image::ImageReader;
 use serde::Deserialize;
 
 use crate::api;
+use crate::images::RawImage;
 
 #[derive(Debug, Clone, Deserialize, Default)]
 pub struct RecipeFormInput {
@@ -29,7 +30,7 @@ pub struct RecipeFormValidator {
     pub name: Result<String, &'static str>,
     pub prep_time: Result<u16, &'static str>,
     pub cook_time: Result<u16, &'static str>,
-    pub image: Result<DynamicImage, &'static str>,
+    pub image: Result<RawImage, &'static str>,
 }
 
 impl TryFrom<RecipeFormInput> for api::model::NewRecipe {
@@ -59,11 +60,20 @@ impl TryFrom<RecipeFormInput> for api::model::NewRecipe {
             },
         };
 
-        let image = ImageReader::new(Cursor::new(value.image))
-            .with_guessed_format()
-            .ok()
-            .and_then(|r| r.decode().ok())
-            .ok_or("Image invalide");
+        let image_reader = ImageReader::new(Cursor::new(value.image));
+        let image = match image_reader.with_guessed_format() {
+            Ok(reader) => {
+                let format = reader.format().unwrap();
+                match reader.decode() {
+                    Ok(img) => Ok(RawImage {
+                        data: img,
+                        ext: format,
+                    }),
+                    Err(_) => Err("Image invalide"),
+                }
+            }
+            Err(_) => Err("Image invalide"),
+        };
 
         let rv = RecipeFormValidator {
             name,

@@ -6,6 +6,7 @@ use serde::Deserialize;
 pub(crate) struct AppConf {
     pub(crate) db: DBConf,
     pub(crate) http: HttpConf,
+    pub(crate) images: ImagesConf,
 }
 
 #[derive(Deserialize)]
@@ -21,6 +22,11 @@ pub(crate) struct DBConf {
 pub(crate) struct DBUser {
     pub(crate) name: String,
     pub(crate) password: String,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct ImagesConf {
+    pub(crate) path: String,
 }
 
 #[derive(Deserialize)]
