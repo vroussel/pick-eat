@@ -5,8 +5,8 @@ use derive_more::Debug;
 use image::ImageReader;
 use serde::Deserialize;
 
-use crate::api;
 use crate::images::RawImage;
+use crate::model::NewRecipe;
 
 #[derive(Debug, Clone, Deserialize, Default)]
 pub struct RecipeFormInput {
@@ -33,7 +33,7 @@ pub struct RecipeFormValidator {
     pub image: Result<RawImage, &'static str>,
 }
 
-impl TryFrom<RecipeFormInput> for api::model::NewRecipe {
+impl TryFrom<RecipeFormInput> for NewRecipe {
     type Error = RecipeFormErrors;
 
     fn try_from(value: RecipeFormInput) -> Result<Self, Self::Error> {
@@ -83,7 +83,7 @@ impl TryFrom<RecipeFormInput> for api::model::NewRecipe {
         };
 
         match (rv.name, rv.prep_time, rv.cook_time, rv.image) {
-            (Ok(name), Ok(prep_time), Ok(cook_time), Ok(image)) => Ok(api::model::NewRecipe {
+            (Ok(name), Ok(prep_time), Ok(cook_time), Ok(image)) => Ok(NewRecipe {
                 name,
                 prep_time,
                 cook_time,

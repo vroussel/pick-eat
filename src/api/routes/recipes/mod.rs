@@ -1,11 +1,10 @@
-mod forms;
+mod form_validation;
 
-use forms::*;
+use form_validation::*;
 
 use crate::{
-    AppState,
-    api::{self, model::NewRecipe},
-    app,
+    AppState, api, app,
+    model::{NewRecipe, Recipe},
 };
 use askama::Template;
 use axum::{
@@ -67,7 +66,7 @@ pub(crate) async fn post(
 #[derive(Template)]
 #[template(path = "pages/recipe.html")]
 struct RecipePage {
-    recipe: app::model::Recipe,
+    recipe: Recipe,
 }
 
 pub async fn get(

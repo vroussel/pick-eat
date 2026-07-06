@@ -1,5 +1,7 @@
 use derive_more::Debug;
-use image::{DynamicImage, ImageFormat};
+use uuid::Uuid;
+
+use crate::images::RawImage;
 
 #[derive(Debug)]
 pub struct NewRecipe {
@@ -10,8 +12,10 @@ pub struct NewRecipe {
     pub image: RawImage,
 }
 
-#[derive(Debug)]
-pub struct RawImage {
-    pub data: DynamicImage,
-    pub ext: ImageFormat,
+#[derive(Clone)]
+pub struct Recipe {
+    pub id: Uuid,
+    pub name: String,
+    pub prep_time: u16,
+    pub cook_time: u16,
 }

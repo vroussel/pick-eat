@@ -1,5 +1,5 @@
-mod model;
-pub mod queries;
+mod recipes;
+pub use recipes::*;
 
 use std::time::Duration;
 

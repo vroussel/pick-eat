@@ -25,6 +25,7 @@ mod conf;
 mod db;
 mod images;
 mod logging;
+mod model;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]

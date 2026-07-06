@@ -5,7 +5,6 @@ use tracing::error;
 
 use crate::AppError;
 
-pub mod model;
 pub mod routes;
 
 impl IntoResponse for AppError {
