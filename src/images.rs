@@ -4,17 +4,21 @@ use image::{DynamicImage, ImageFormat};
 use strum::{EnumIter, IntoEnumIterator};
 use uuid::Uuid;
 
-struct ImageBank {
+use crate::conf::ImagesConf;
+
+#[derive(Clone, Debug)]
+pub struct ImageBank {
     root_dir: PathBuf,
 }
 
 #[derive(Debug)]
 pub struct RawImage {
-    pub data: DynamicImage,
-    pub ext: ImageFormat,
+    data: DynamicImage,
+    ext: ImageFormat,
 }
 
-struct StoredImage {
+#[derive(Clone)]
+pub struct StoredImage {
     stem: String,
     extension: String,
 }
@@ -28,7 +32,13 @@ enum ImageSize {
 }
 
 impl ImageBank {
-    fn add_image(&self, image: RawImage) -> StoredImage {
+    pub fn new(conf: &ImagesConf) -> Self {
+        Self {
+            root_dir: PathBuf::from(conf.path.clone()),
+        }
+    }
+
+    pub fn add_image(&self, image: RawImage) -> StoredImage {
         let uuid = Uuid::new_v4();
         let ext = *image.ext.extensions_str().first().unwrap();
         for size in ImageSize::iter() {
@@ -46,7 +56,7 @@ impl ImageBank {
         }
     }
 
-    fn stored_image_path(&self, image: &StoredImage, size: ImageSize) -> PathBuf {
+    pub fn stored_image_path(&self, image: &StoredImage, size: ImageSize) -> PathBuf {
         let px = size as u32;
         self.root_dir
             .join(format!("{}-{}.{}", &image.stem, px, &image.extension))

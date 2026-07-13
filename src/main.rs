@@ -17,7 +17,7 @@ use tower_http::{
 use tower_livereload::LiveReloadLayer;
 use tracing::info;
 
-use crate::conf::AppConf;
+use crate::{conf::AppConf, images::ImageBank};
 
 mod api;
 mod app;
@@ -37,6 +37,7 @@ struct Args {
 #[derive(Clone, Debug)]
 struct AppState {
     db_pool: PgPool,
+    image_bank: ImageBank,
 }
 
 #[derive(Error, Debug)]
@@ -61,7 +62,11 @@ async fn main() -> Result<(), anyhow::Error> {
     let conf = AppConf::from_file(args.conf)?;
 
     let db_pool = db::init(&conf.db).await?;
-    let shared_state = AppState { db_pool };
+    let image_bank = ImageBank::new(&conf.images);
+    let shared_state = AppState {
+        db_pool,
+        image_bank,
+    };
 
     let app = Router::new()
         .route("/isalive", get(api::routes::is_alive))
