@@ -15,7 +15,7 @@ pub struct RecipeFormInput {
     pub cook_time: String,
     #[serde(skip)]
     #[debug(skip)]
-    pub image: Bytes,
+    pub image: Option<Bytes>,
 }
 
 #[derive(Debug, Default)]
@@ -30,7 +30,7 @@ pub struct RecipeFormValidator {
     pub name: Result<String, &'static str>,
     pub prep_time: Result<u16, &'static str>,
     pub cook_time: Result<u16, &'static str>,
-    pub image: Result<RawImage, &'static str>,
+    pub image: Result<Option<RawImage>, &'static str>,
 }
 
 impl TryFrom<RecipeFormInput> for NewRecipe {
@@ -60,19 +60,24 @@ impl TryFrom<RecipeFormInput> for NewRecipe {
             },
         };
 
-        let image_reader = ImageReader::new(Cursor::new(value.image));
-        let image = match image_reader.with_guessed_format() {
-            Ok(reader) => {
-                let format = reader.format().unwrap();
-                match reader.decode() {
-                    Ok(img) => Ok(RawImage {
-                        data: img,
-                        ext: format,
-                    }),
+        let image = match value.image {
+            Some(bytes) => {
+                let image_reader = ImageReader::new(Cursor::new(bytes));
+                match image_reader.with_guessed_format() {
+                    Ok(reader) => {
+                        let format = reader.format().unwrap();
+                        match reader.decode() {
+                            Ok(img) => Ok(Some(RawImage {
+                                data: img,
+                                ext: format,
+                            })),
+                            Err(_) => Err("Image invalide"),
+                        }
+                    }
                     Err(_) => Err("Image invalide"),
                 }
             }
-            Err(_) => Err("Image invalide"),
+            None => Ok(None),
         };
 
         let rv = RecipeFormValidator {

@@ -38,7 +38,7 @@ pub(crate) async fn post(
             Some("name") => new_recipe.name = field.text().await.unwrap(),
             Some("prep_time") => new_recipe.prep_time = field.text().await.unwrap(),
             Some("cook_time") => new_recipe.cook_time = field.text().await.unwrap(),
-            Some("image") => new_recipe.image = field.bytes().await.unwrap(),
+            Some("image") => new_recipe.image = Some(field.bytes().await.unwrap()),
             _ => {}
         }
     }

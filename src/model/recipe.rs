@@ -1,7 +1,7 @@
 use derive_more::Debug;
 use uuid::Uuid;
 
-use crate::images::RawImage;
+use crate::images::{RawImage, StoredImage};
 
 #[derive(Debug)]
 pub struct NewRecipe {
@@ -9,7 +9,7 @@ pub struct NewRecipe {
     pub prep_time: u16,
     pub cook_time: u16,
     #[debug(skip)]
-    pub image: RawImage,
+    pub image: Option<RawImage>,
 }
 
 #[derive(Clone)]
@@ -18,4 +18,5 @@ pub struct Recipe {
     pub name: String,
     pub prep_time: u16,
     pub cook_time: u16,
+    pub image: Option<StoredImage>,
 }

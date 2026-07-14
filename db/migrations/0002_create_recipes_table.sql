@@ -3,5 +3,8 @@ CREATE TABLE recipes (
     name TEXT NOT NULL,
     prep_time INT NOT NULL,
     cook_time INT NOT NULL,
-    image TEXT
+    image_stem TEXT,
+    image_extension TEXT,
+
+    CHECK ((image_stem IS NULL) = (image_extension IS NULL))
 )

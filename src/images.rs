@@ -13,18 +13,18 @@ pub struct ImageBank {
 
 #[derive(Debug)]
 pub struct RawImage {
-    data: DynamicImage,
-    ext: ImageFormat,
+    pub data: DynamicImage,
+    pub ext: ImageFormat,
 }
 
 #[derive(Clone)]
 pub struct StoredImage {
-    stem: String,
-    extension: String,
+    pub stem: String,
+    pub extension: String,
 }
 
 #[derive(EnumIter, Clone, Copy)]
-enum ImageSize {
+pub enum ImageSize {
     _128 = 128,
     _256 = 256,
     _512 = 512,
