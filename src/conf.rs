@@ -26,7 +26,7 @@ pub(crate) struct DBUser {
 
 #[derive(Deserialize)]
 pub(crate) struct ImagesConf {
-    pub(crate) path: String,
+    pub(crate) storage_root: String,
 }
 
 #[derive(Deserialize)]

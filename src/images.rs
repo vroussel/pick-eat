@@ -8,7 +8,7 @@ use crate::conf::ImagesConf;
 
 #[derive(Clone, Debug)]
 pub struct ImageBank {
-    root_dir: PathBuf,
+    storage_root: PathBuf,
 }
 
 #[derive(Debug)]
@@ -34,7 +34,7 @@ pub enum ImageSize {
 impl ImageBank {
     pub fn new(conf: &ImagesConf) -> Self {
         Self {
-            root_dir: PathBuf::from(conf.path.clone()),
+            storage_root: PathBuf::from(conf.storage_root.clone()),
         }
     }
 
@@ -43,7 +43,7 @@ impl ImageBank {
         let ext = *image.ext.extensions_str().first().unwrap();
         for size in ImageSize::iter() {
             let px = size as u32;
-            let path = self.root_dir.join(format!("{}-{}.{}", &uuid, px, &ext));
+            let path = self.storage_root.join(format!("{}-{}.{}", &uuid, px, &ext));
             image
                 .data
                 .resize(px, px, image::imageops::FilterType::Lanczos3)
@@ -58,7 +58,7 @@ impl ImageBank {
 
     pub fn stored_image_path(&self, image: &StoredImage, size: ImageSize) -> PathBuf {
         let px = size as u32;
-        self.root_dir
+        self.storage_root
             .join(format!("{}-{}.{}", &image.stem, px, &image.extension))
     }
 }
