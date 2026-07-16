@@ -68,7 +68,7 @@ impl ImageBank {
         let px = size as u32;
         // get last 2 chars of stem
         let subdir = &image.stem[image.stem.char_indices().nth_back(1).unwrap().0..];
-        PathBuf::from(subdir).join(format!("{}-{}.{}", &image.stem, px, &image.extension))
+        PathBuf::from(subdir).join(format!("{}-{}.{}", image.stem, px, image.extension))
     }
 
     fn stored_image_file_path(&self, image: &StoredImage, size: ImageSize) -> PathBuf {
