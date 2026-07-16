@@ -41,24 +41,31 @@ impl ImageBank {
     pub fn add_image(&self, image: RawImage) -> StoredImage {
         let uuid = Uuid::new_v4();
         let ext = *image.ext.extensions_str().first().unwrap();
+        let stored_image = StoredImage {
+            stem: uuid.to_string(),
+            extension: ext.to_owned(),
+        };
         for size in ImageSize::iter() {
             let px = size as u32;
-            let path = self.storage_root.join(format!("{}-{}.{}", &uuid, px, &ext));
+            let path = self.stored_image_file_path(&stored_image, size);
             image
                 .data
                 .resize(px, px, image::imageops::FilterType::Lanczos3)
                 .save(path)
                 .unwrap();
         }
-        StoredImage {
-            stem: uuid.to_string(),
-            extension: ext.to_owned(),
-        }
+
+        stored_image
     }
 
-    pub fn stored_image_path(&self, image: &StoredImage, size: ImageSize) -> PathBuf {
+    fn stored_image_rel_path(&self, image: &StoredImage, size: ImageSize) -> PathBuf {
         let px = size as u32;
         self.storage_root
             .join(format!("{}-{}.{}", &image.stem, px, &image.extension))
+    }
+
+    fn stored_image_file_path(&self, image: &StoredImage, size: ImageSize) -> PathBuf {
+        let rel_path = self.stored_image_rel_path(image, size);
+        self.storage_root.join(rel_path)
     }
 }
