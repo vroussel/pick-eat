@@ -9,4 +9,10 @@
     prep_time: {{ recipe.prep_time }}
     cook_time: {{ recipe.cook_time }}
 </p>
+
+{% if let Some(img) = recipe.image %}
+<img src="{{ image_bank.stored_image_url(img, ImageSize::_512).into_os_string().into_string().unwrap() }}"
+    alt="Girl in a jacket">
+{% endif %}
+
 {%- endblock %}

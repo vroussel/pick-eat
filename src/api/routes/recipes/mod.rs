@@ -4,6 +4,7 @@ use form_validation::*;
 
 use crate::{
     AppState, api, app,
+    images::{ImageBank, ImageSize},
     model::{NewRecipe, Recipe},
 };
 use askama::Template;
@@ -65,16 +66,26 @@ pub(crate) async fn post(
 #[template(path = "pages/recipe.html")]
 struct RecipePage {
     recipe: Recipe,
+    image_bank: ImageBank,
 }
 
 pub async fn get(
     State(state): State<AppState>,
     Path(recipe_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, AppError> {
-    let recipe = app::recipes::retrieve(state, &recipe_id).await?;
+    let recipe = app::recipes::retrieve(&state, &recipe_id).await?;
 
     let response = match recipe {
-        Some(r) => (StatusCode::OK, Html(RecipePage { recipe: r }.render()?)),
+        Some(r) => (
+            StatusCode::OK,
+            Html(
+                RecipePage {
+                    recipe: r,
+                    image_bank: state.image_bank,
+                }
+                .render()?,
+            ),
+        ),
         None => (StatusCode::NOT_FOUND, api::not_found_page()?),
     };
 

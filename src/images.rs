@@ -9,6 +9,7 @@ use crate::conf::ImagesConf;
 #[derive(Clone, Debug)]
 pub struct ImageBank {
     storage_root: PathBuf,
+    url_prefix: PathBuf,
 }
 
 #[derive(Debug)]
@@ -35,6 +36,7 @@ impl ImageBank {
     pub fn new(conf: &ImagesConf) -> Self {
         Self {
             storage_root: PathBuf::from(conf.storage_root.clone()),
+            url_prefix: PathBuf::from(conf.url_prefix.clone()),
         }
     }
 
@@ -66,13 +68,16 @@ impl ImageBank {
         let px = size as u32;
         // get last 2 chars of stem
         let subdir = &image.stem[image.stem.char_indices().nth_back(1).unwrap().0..];
-        self.storage_root
-            .join(subdir)
-            .join(format!("{}-{}.{}", &image.stem, px, &image.extension))
+        PathBuf::from(subdir).join(format!("{}-{}.{}", &image.stem, px, &image.extension))
     }
 
     fn stored_image_file_path(&self, image: &StoredImage, size: ImageSize) -> PathBuf {
         let rel_path = self.stored_image_rel_path(image, size);
         self.storage_root.join(rel_path)
+    }
+
+    pub fn stored_image_url(&self, image: &StoredImage, size: ImageSize) -> PathBuf {
+        let rel_path = self.stored_image_rel_path(image, size);
+        self.url_prefix.join(rel_path)
     }
 }

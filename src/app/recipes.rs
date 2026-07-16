@@ -18,6 +18,6 @@ pub async fn create(state: AppState, new_recipe: NewRecipe) -> Result<Recipe, Ap
     Ok(recipe)
 }
 
-pub async fn retrieve(state: AppState, id: &Uuid) -> Result<Option<Recipe>, AppError> {
+pub async fn retrieve(state: &AppState, id: &Uuid) -> Result<Option<Recipe>, AppError> {
     Ok(db::get_recipe(&state.db_pool, id).await?)
 }
