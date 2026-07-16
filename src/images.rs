@@ -64,7 +64,10 @@ impl ImageBank {
 
     fn stored_image_rel_path(&self, image: &StoredImage, size: ImageSize) -> PathBuf {
         let px = size as u32;
+        // get last 2 chars of stem
+        let subdir = &image.stem[image.stem.char_indices().nth_back(1).unwrap().0..];
         self.storage_root
+            .join(subdir)
             .join(format!("{}-{}.{}", &image.stem, px, &image.extension))
     }
 
