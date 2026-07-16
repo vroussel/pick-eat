@@ -4,7 +4,9 @@ services:
     build:
       dockerfile: ./infra/nginx/Dockerfile
     network_mode: host
-    volumes: [./infra/nginx/dev/conf.d/:/etc/nginx/conf.d]
+    volumes:
+      - ./infra/nginx/dev/conf.d/:/etc/nginx/conf.d
+      - ${IMAGES_STORAGE_ROOT}:/srv/www/images
     develop:
       watch:
         - action: rebuild
