@@ -81,12 +81,13 @@ on_success = "back" # so that we don't open the browser at each change
 [jobs.run]
 command = [
     "cargo", "run",
-    "--", "--conf", "dev/pickeat.toml"
+    "--", "--conf", "pickeat.toml"
     # put launch parameters for your program behind a `--` separator
 ]
 need_stdout = true
 allow_warnings = true
 background = true
+workdir="dev/"
 
 # Run your long-running application (eg server) and have the result displayed in bacon.
 # For programs that never stop (eg a server), `background` is set to false
@@ -101,7 +102,7 @@ background = true
 [jobs.run-long]
 command = [
     "cargo", "run",
-    "--", "--conf", "dev/pickeat.toml"
+    "--", "--conf", "pickeat.toml"
     # put launch parameters for your program behind a `--` separator
 ]
 need_stdout = true
@@ -109,6 +110,7 @@ allow_warnings = true
 background = false
 on_change_strategy = "kill_then_restart"
 watch = ["web/templates"]
+workdir="dev/"
 # kill = ["pkill", "-TERM", "-P"]
 
 # This parameterized job runs the example of your choice, as soon
