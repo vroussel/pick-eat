@@ -4,3 +4,4 @@ target
 .env
 pickeat-dev.toml
 images
+infra/nginx/dev/conf.d/pickeat.conf
