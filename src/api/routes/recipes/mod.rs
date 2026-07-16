@@ -25,8 +25,6 @@ struct RecipeForm {
     errors: RecipeFormErrors,
 }
 
-enum ParseImageError {}
-
 #[axum::debug_handler]
 pub(crate) async fn post(
     State(state): State<AppState>,
