@@ -48,6 +48,10 @@ impl ImageBank {
         for size in ImageSize::iter() {
             let px = size as u32;
             let path = self.stored_image_file_path(&stored_image, size);
+
+            if let Some(parent) = path.parent() {
+                std::fs::create_dir_all(parent).unwrap();
+            }
             image
                 .data
                 .resize(px, px, image::imageops::FilterType::Lanczos3)
