@@ -1,20 +1,26 @@
 ---
+name: pickeat
 services:
   nginx:
     build:
-      dockerfile: ./infra/nginx/Dockerfile
+      context: ../infra/nginx/
+      additional_contexts:
+        assets: ../web/assets
     network_mode: host
     volumes:
-      - ./infra/nginx/dev/conf.d/:/etc/nginx/conf.d
+      - ./nginx/conf.d/:/etc/nginx/conf.d
       - ${IMAGES_STORAGE_ROOT}:/srv/www/images
     develop:
       watch:
         - action: rebuild
-          path: ./infra/nginx/
+          path: ../infra/nginx/
         - action: rebuild
-          path: ./web/assets/
+          path: ../web/assets/
+        - action: rebuild
+          path: ./nginx/
   postgres:
-    build: ./infra/postgres
+    build:
+      context: ../infra/postgres/
     environment:
       POSTGRES_PASSWORD: ${DB_SUPERUSER_PASSWORD}
       DB_PICKEAT_PASSWORD: ${DB_PICKEAT_PASSWORD}
@@ -30,17 +36,16 @@ services:
     develop:
       watch:
         - action: rebuild
-          path: ./infra/postgres/
+          path: ../infra/postgres/
         - action: rebuild
-          path: ./db/migrations/
+          path: ../db/migrations/
   migrate:
     build:
-      context: .
       dockerfile_inline: |
         FROM rust:slim
         RUN cargo install sqlx-cli --no-default-features --features postgres
         ENTRYPOINT ["sqlx", "migrate", "run"]
-    volumes: [./db/migrations:/migrations]
+    volumes: [../db/migrations:/migrations]
     environment:
       DATABASE_URL: postgres://pickeat:${DB_PICKEAT_PASSWORD}@postgres:5432/pickeat
     depends_on:

@@ -2,6 +2,6 @@ tags
 todo
 target
 .env
-pickeat-dev.toml
+dev/pickeat.toml
 images
-infra/nginx/dev/conf.d/pickeat.conf
+dev/nginx/conf.d/pickeat.conf
