@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT id, name, prep_time, cook_time\n        FROM recipes\n        WHERE id = $1\n    ",
+  "query": "\n        SELECT id, name, prep_time, cook_time, image_stem, image_extension\n        FROM recipes\n        WHERE id = $1\n    ",
   "describe": {
     "columns": [
       {
@@ -22,6 +22,16 @@
         "ordinal": 3,
         "name": "cook_time",
         "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "image_stem",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "image_extension",
+        "type_info": "Text"
       }
     ],
     "parameters": {
@@ -33,8 +43,10 @@
       false,
       false,
       false,
-      false
+      false,
+      true,
+      true
     ]
   },
-  "hash": "c55e3d6f5329e33911141e633f09f11e53bdeeb00982a68c654091ad364df51c"
+  "hash": "315554d09caf281c5daffbf2cb6f405aad285176b593e1773241f886027037af"
 }

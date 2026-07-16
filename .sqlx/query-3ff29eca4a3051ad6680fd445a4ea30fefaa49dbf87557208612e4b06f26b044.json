@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO recipes (id, name, prep_time, cook_time, image_stem, image_extension)\n        VALUES($1, $2, $3, $4, $5, $6)\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int4",
+        "Int4",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3ff29eca4a3051ad6680fd445a4ea30fefaa49dbf87557208612e4b06f26b044"
+}
