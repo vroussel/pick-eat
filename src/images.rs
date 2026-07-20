@@ -15,6 +15,7 @@ pub struct ImageBank {
 #[derive(Debug)]
 pub struct RawImage {
     pub data: DynamicImage,
+    #[allow(dead_code)]
     pub ext: ImageFormat,
 }
 
@@ -42,10 +43,10 @@ impl ImageBank {
 
     pub fn add_image(&self, image: RawImage) -> StoredImage {
         let uuid = Uuid::new_v4();
-        let ext = *image.ext.extensions_str().first().unwrap();
+        let (ext, ext_str) = (ImageFormat::WebP, "webp");
         let stored_image = StoredImage {
             stem: uuid.to_string(),
-            extension: ext.to_owned(),
+            extension: ext_str.to_owned(),
         };
         for size in ImageSize::iter() {
             let px = size as u32;
@@ -57,7 +58,7 @@ impl ImageBank {
             image
                 .data
                 .resize(px, px, image::imageops::FilterType::Lanczos3)
-                .save(path)
+                .save_with_format(path, ext)
                 .unwrap();
         }
 
