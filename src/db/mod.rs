@@ -11,7 +11,7 @@ use sqlx::{
 use tracing::log::LevelFilter;
 
 use crate::conf::DBConf;
-pub(crate) async fn init(conf: &DBConf) -> Result<PgPool, sqlx::Error> {
+pub async fn init(conf: &DBConf) -> Result<PgPool, sqlx::Error> {
     let db_migration_url = format!(
         "postgres://{}:{}@{}:{}/{}",
         conf.migration_user.name, conf.migration_user.password, conf.host, conf.port, conf.name

@@ -3,7 +3,7 @@ use std::{io, net::Ipv4Addr, path::PathBuf};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
-pub(crate) struct AppConf {
+pub struct AppConf {
     pub(crate) db: DBConf,
     pub(crate) http: HttpConf,
     pub(crate) images: ImagesConf,

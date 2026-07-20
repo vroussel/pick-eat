@@ -27,7 +27,7 @@ struct RecipeForm {
 }
 
 #[axum::debug_handler]
-pub(crate) async fn post(
+pub async fn post(
     State(state): State<AppState>,
     mut multipart: Multipart,
 ) -> Result<impl IntoResponse, AppError> {
