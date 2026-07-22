@@ -13,6 +13,9 @@ impl IntoResponse for AppError {
         let (code, body) = match self {
             AppError::DBError(_) => (StatusCode::INTERNAL_SERVER_ERROR, ""),
             AppError::RenderError(_) => (StatusCode::INTERNAL_SERVER_ERROR, ""),
+            AppError::MultiPartError(_) => (StatusCode::INTERNAL_SERVER_ERROR, ""),
+            AppError::ImageError(_) => (StatusCode::INTERNAL_SERVER_ERROR, ""),
+            AppError::IOError(_) => (StatusCode::INTERNAL_SERVER_ERROR, ""),
         };
         (code, body).into_response()
     }

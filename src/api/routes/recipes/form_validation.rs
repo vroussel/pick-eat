@@ -65,13 +65,11 @@ impl TryFrom<RecipeFormInput> for NewRecipe {
                 let image_reader = ImageReader::new(Cursor::new(bytes));
                 match image_reader.with_guessed_format() {
                     Ok(reader) => {
-                        let format = reader.format().unwrap();
-                        match reader.decode() {
-                            Ok(img) => Ok(Some(RawImage {
-                                data: img,
-                                ext: format,
-                            })),
-                            Err(_) => Err("Image invalide"),
+                        let format = reader.format();
+                        let img = reader.decode();
+                        match (format, img) {
+                            (Some(ext), Ok(data)) => Ok(Some(RawImage { data, ext })),
+                            _ => Err("Image invalide"),
                         }
                     }
                     Err(_) => Err("Image invalide"),

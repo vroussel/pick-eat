@@ -4,12 +4,12 @@ use image::{DynamicImage, ImageFormat};
 use strum::{EnumIter, IntoEnumIterator};
 use uuid::Uuid;
 
-use crate::conf::ImagesConf;
+use crate::{AppError, conf::ImagesConf};
 
 #[derive(Clone, Debug)]
 pub struct ImageBank {
     storage_root: PathBuf,
-    url_prefix: PathBuf,
+    url_prefix: String,
 }
 
 #[derive(Debug)]
@@ -37,11 +37,11 @@ impl ImageBank {
     pub fn new(conf: &ImagesConf) -> Self {
         Self {
             storage_root: PathBuf::from(conf.storage_root.clone()),
-            url_prefix: PathBuf::from(conf.url_prefix.clone()),
+            url_prefix: conf.url_prefix.trim_end_matches('/').to_owned(),
         }
     }
 
-    pub fn add_image(&self, image: RawImage) -> StoredImage {
+    pub fn add_image(&self, image: RawImage) -> Result<StoredImage, AppError> {
         let uuid = Uuid::new_v4();
         let (ext, ext_str) = (ImageFormat::WebP, "webp");
         let stored_image = StoredImage {
@@ -53,32 +53,36 @@ impl ImageBank {
             let path = self.stored_image_file_path(&stored_image, size);
 
             if let Some(parent) = path.parent() {
-                std::fs::create_dir_all(parent).unwrap();
+                std::fs::create_dir_all(parent)?;
             }
             image
                 .data
                 .resize(px, px, image::imageops::FilterType::Lanczos3)
-                .save_with_format(path, ext)
-                .unwrap();
+                .save_with_format(path, ext)?;
         }
 
-        stored_image
+        Ok(stored_image)
     }
 
-    fn stored_image_rel_path(&self, image: &StoredImage, size: ImageSize) -> PathBuf {
+    fn stored_image_filename(&self, image: &StoredImage, size: ImageSize) -> String {
         let px = size as u32;
+        format!("{}-{}.{}", image.stem, px, image.extension)
+    }
+
+    fn stored_image_subdir(&self, image: &StoredImage) -> String {
         // get last 2 hex digits of stem
-        let subdir = format!("{:02x}", image.stem.as_bytes()[15]);
-        PathBuf::from(subdir).join(format!("{}-{}.{}", image.stem, px, image.extension))
+        format!("{:02x}", image.stem.as_bytes()[15])
     }
 
     fn stored_image_file_path(&self, image: &StoredImage, size: ImageSize) -> PathBuf {
-        let rel_path = self.stored_image_rel_path(image, size);
-        self.storage_root.join(rel_path)
+        let filename = self.stored_image_filename(image, size);
+        let subdir = self.stored_image_subdir(image);
+        self.storage_root.join(subdir).join(filename)
     }
 
-    pub fn stored_image_url(&self, image: &StoredImage, size: ImageSize) -> PathBuf {
-        let rel_path = self.stored_image_rel_path(image, size);
-        self.url_prefix.join(rel_path)
+    pub fn stored_image_url(&self, image: &StoredImage, size: ImageSize) -> String {
+        let filename = self.stored_image_filename(image, size);
+        let subdir = self.stored_image_subdir(image);
+        format!("{}/{}/{}", self.url_prefix, subdir, filename)
     }
 }

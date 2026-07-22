@@ -11,8 +11,7 @@
 </p>
 
 {% if let Some(img) = recipe.image %}
-<img src="{{ image_bank.stored_image_url(img, ImageSize::_512).into_os_string().into_string().unwrap() }}"
-    alt="Girl in a jacket">
+<img src="{{ image_bank.stored_image_url(img, ImageSize::_512) }}" alt="Girl in a jacket">
 {% endif %}
 
 {%- endblock %}

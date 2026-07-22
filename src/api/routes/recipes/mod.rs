@@ -32,12 +32,12 @@ pub async fn post(
     mut multipart: Multipart,
 ) -> Result<impl IntoResponse, AppError> {
     let mut new_recipe = RecipeFormInput::default();
-    while let Some(field) = multipart.next_field().await.unwrap() {
+    while let Some(field) = multipart.next_field().await? {
         match field.name() {
-            Some("name") => new_recipe.name = field.text().await.unwrap(),
-            Some("prep_time") => new_recipe.prep_time = field.text().await.unwrap(),
-            Some("cook_time") => new_recipe.cook_time = field.text().await.unwrap(),
-            Some("image") => new_recipe.image = Some(field.bytes().await.unwrap()),
+            Some("name") => new_recipe.name = field.text().await?,
+            Some("prep_time") => new_recipe.prep_time = field.text().await?,
+            Some("cook_time") => new_recipe.cook_time = field.text().await?,
+            Some("image") => new_recipe.image = Some(field.bytes().await?),
             _ => {}
         }
     }
