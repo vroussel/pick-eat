@@ -8,7 +8,7 @@ pub struct RecipeRow {
     pub name: String,
     pub prep_time: i32,
     pub cook_time: i32,
-    pub image_stem: Option<String>,
+    pub image_stem: Option<Uuid>,
     pub image_extension: Option<String>,
 }
 

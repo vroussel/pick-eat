@@ -21,7 +21,7 @@ pub struct RawImage {
 
 #[derive(Clone)]
 pub struct StoredImage {
-    pub stem: String,
+    pub stem: Uuid,
     pub extension: String,
 }
 
@@ -45,7 +45,7 @@ impl ImageBank {
         let uuid = Uuid::new_v4();
         let (ext, ext_str) = (ImageFormat::WebP, "webp");
         let stored_image = StoredImage {
-            stem: uuid.to_string(),
+            stem: uuid,
             extension: ext_str.to_owned(),
         };
         for size in ImageSize::iter() {
@@ -67,8 +67,8 @@ impl ImageBank {
 
     fn stored_image_rel_path(&self, image: &StoredImage, size: ImageSize) -> PathBuf {
         let px = size as u32;
-        // get last 2 chars of stem
-        let subdir = &image.stem[image.stem.char_indices().nth_back(1).unwrap().0..];
+        // get last 2 hex digits of stem
+        let subdir = format!("{:02x}", image.stem.as_bytes()[15]);
         PathBuf::from(subdir).join(format!("{}-{}.{}", image.stem, px, image.extension))
     }
 
