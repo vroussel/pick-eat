@@ -19,7 +19,7 @@ impl From<model::Recipe> for RecipeRow {
             name: value.name,
             prep_time: value.prep_time as i32,
             cook_time: value.cook_time as i32,
-            image_stem: value.image.as_ref().map(|img| img.stem.clone()),
+            image_stem: value.image.as_ref().map(|img| img.stem),
             image_extension: value.image.map(|img| img.extension),
         }
     }

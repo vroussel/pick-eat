@@ -43,15 +43,15 @@ struct AppState {
 #[derive(Error, Debug)]
 enum AppError {
     #[error("Database error: {0}")]
-    DBError(#[from] sqlx::Error),
+    DB(#[from] sqlx::Error),
     #[error("Template rendering error: {0}")]
-    RenderError(#[from] askama::Error),
+    Render(#[from] askama::Error),
     #[error("Form multipart error: {0}")]
-    MultiPartError(#[from] axum::extract::multipart::MultipartError),
+    MultiPart(#[from] axum::extract::multipart::MultipartError),
     #[error("Image error: {0}")]
-    ImageError(#[from] image::ImageError),
+    Image(#[from] image::ImageError),
     #[error("IO error: {0}")]
-    IOError(#[from] std::io::Error),
+    IO(#[from] std::io::Error),
 }
 
 #[tokio::main]
