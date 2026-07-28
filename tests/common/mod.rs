@@ -1,7 +1,4 @@
-pub mod inputs;
-
 use askama::Template;
-use serde::Serialize;
 use sqlx::{PgPool, postgres::PgConnectOptions};
 use std::{
     fs,
