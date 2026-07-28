@@ -1,11 +1,13 @@
-set dotenv-path := "dev/.env"
 set dotenv-load
 
 @help:
   just --list --justfile {{justfile()}}
 
-@build-dev-conf:
-    [ -f dev/.env ] || (echo "Error: dev/.env not found, copy dev/.env.example to dev/.env" && exit 1)
+@setup-dev-env:
+    [ -f dev/.env -a -f .env ] || { \
+        cp ./dev/.env.example ./dev/.env; \
+        ln -nfs ./dev/.env .env; \
+    }
     @envsubst < dev/pickeat.toml.tmpl > dev/pickeat.toml
     @envsubst < dev/nginx/conf.d/pickeat.conf.tmpl > dev/nginx/conf.d/pickeat.conf
 
