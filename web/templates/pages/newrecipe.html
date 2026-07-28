@@ -43,8 +43,7 @@
 
     {% call field("Photo", errors.image) %}
     <input hx-preserve id="image-input" name="image" type="file"
-        class="file-input file-input-md {{ error_class(errors.image) }}" min="0" value="{{ input.cook_time }}"
-        oninput="reset_input_error(this)">
+        class="file-input file-input-md {{ error_class(errors.image) }}" oninput="reset_input_error(this)">
     {% endcall %}
     <img hx-preserve id="image-preview" class="block max-w-xs cursor-pointer" onclick="edit_crop()" hidden="true"
         src="#" alt="Prévisualisation de la photo de la recette, après crop">
