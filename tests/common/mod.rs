@@ -124,6 +124,10 @@ impl TestApp {
 /// [db.migration_user]
 /// name = "pickeat"
 /// password = "{{ migration_user_password }}"
+///
+/// [images]
+/// storage_root = "/tmp/images"
+/// url_prefix = "/images/"
 /// ```
 #[derive(Template)]
 #[template(ext = "txt", in_doc = true)]
@@ -131,10 +135,4 @@ struct TestAppConf {
     test_db_name: String,
     app_user_password: String,
     migration_user_password: String,
-}
-
-pub fn url_encode_form<T: Serialize>(value: T) -> Result<String, serde_qs::Error> {
-    serde_qs::Config::new()
-        .use_form_encoding(true)
-        .serialize_string(&value)
 }
